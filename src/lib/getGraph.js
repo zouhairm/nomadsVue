@@ -13,12 +13,11 @@ export default function getGraph(jsonGraphFileURL) {
   }
 
   return axios.get(jsonGraphFileURL).then( response => {
-  			console.log('finally received data!')
-  			console.log(response.data);
-  			return Promise.resolve(tryJson(response.data));
+  			return tryJson(response.data);
   		});
+  //TODO: add catch handling of error ...
 
-  console.log('already returned :(')
+
   return null;
 
 }

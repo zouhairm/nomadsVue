@@ -11,7 +11,7 @@ export default function createScene(canvas) {
   // Since graph can be loaded dynamically, we have these uninitialized
   // and captured into closure. loadGraph will do the initialization
   let graph, layout;
-  let scene, linkUI, nodeUI;
+  let renderer, linkUI, nodeUI;
 
   let layoutSteps = 0; // how many frames shall we run layout?
   let rafHandle;
@@ -22,36 +22,79 @@ export default function createScene(canvas) {
 
   return {
     dispose,
-    runLayout,
+    resetView,
   };
 
   function loadGraph(newGraph) {
-    if (scene) {
-      scene.dispose();
-      scene = null
+    if (renderer) {
+      renderer.dispose();
+      renderer = null
     }
-    scene = initScene();
+    // scene = initScene();
     graph = newGraph
 
     layout = Viva.Graph.Layout.constant(graph); 
-
+    // node placement is simply given by the
+    // position data for each node
     layout.placeNode(function (node) {
       if (!node.data.orgPos) { console.log(node.data); return {x: 0, y: 0};}
-      return node.data.orgPos;
+      return {x: node.data.orgPos['x'], y: node.data.orgPos['y']} ;
     });
-
-
-
     layout.step();
-    let ui = initUIElements();
-    linkUI = ui.linkUI;
-    nodeUI = ui.nodeUI;
 
-    rafHandle = requestAnimationFrame(frame);
+
+    var graphics = Viva.Graph.View.svgGraphics();
+
+    var defs = Viva.Graph.svg('defs');
+    graphics.getSvgRoot().append(defs);
+
+    // specify where it should be rendered:
+    console.log(document.getElementById( 'cnv' ))
+    renderer = Viva.Graph.View.renderer(graph, {
+      graphics:  Viva.Graph.View.webglGraphics(), //TODO: fallback to SVG if webGL not supported?
+      layout: layout,
+      container: canvas,
+      renderLinks : true,
+      prerender  : true
+
+    });
+    if(renderer)
+      renderer.run();
+
+
+
+
+    // var graphGenerator = Viva.Graph.generator();
+    // var graph2 = graphGenerator.grid(5, 5);
+    // var graphics = Viva.Graph.View.webglGraphics();
+
+
+    // var layout2 = Viva.Graph.Layout.forceDirected(graph2, {
+    //     springLength : 10,
+    //     springCoeff : 0.0005,
+    //     dragCoeff : 0.02,
+    //     gravity : -1.2
+    // });
+
+    // var renderer2 = Viva.Graph.View.renderer(graph, {
+    //     layout : layout,
+    //     container: document.getElementById('cnv'),
+    // });
+
+    // renderer2.run();
+
+
+
+    // let ui = initUIElements();
+    // linkUI = ui.linkUI;
+    // nodeUI = ui.nodeUI;
+
+    // rafHandle = requestAnimationFrame(frame);
   }
 
-  function runLayout(stepsCount) {
-    layoutSteps += stepsCount;
+  function resetView() {
+    //TODO: do whatever is needed to reset the view ...
+    return ;
   }
 
   function initScene() {

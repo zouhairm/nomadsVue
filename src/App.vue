@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <a href="#" @click.prevent='runLayout' class='btn-command'>Make 200 layout steps</a>
+    <a href="#" @click.prevent='resetView' class='btn-command'>Reset View</a>
     
     <a href="#" @click.prevent='loadAllStories' class='btn-command'>Load All Stories!</a>
 
@@ -14,8 +14,8 @@ import getGraph from './lib/getGraph.js'
 export default {
   name: 'app',
   methods: {
-    runLayout() {
-      this.scene.runLayout(200);
+    resetView() {
+      this.scene.resetView()
     },
 
     loadAllStories() {
