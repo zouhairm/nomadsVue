@@ -1,17 +1,26 @@
 <template>
   <div id="app">
     <a href="#" @click.prevent='runLayout' class='btn-command'>Make 200 layout steps</a>
+    
+    <a href="#" @click.prevent='loadAllStories' class='btn-command'>Load All Stories!</a>
+
   </div>
 </template>
 
 <script>
 import createScene from './lib/createScene';
-
+import bus from './lib/bus';
+import getGraph from './lib/getGraph.js'
 export default {
   name: 'app',
   methods: {
     runLayout() {
       this.scene.runLayout(200);
+    },
+
+    loadAllStories() {
+      var pr = getGraph('./2018Stories_cyto_debug.jsonviva.json');
+      pr.then(function(g) {if(g) bus.fire('load-graph', g)});
     }
   },
   mounted() {

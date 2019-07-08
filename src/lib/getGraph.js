@@ -1,24 +1,35 @@
 /**
  * Load your graph here.
  */
-// https://github.com/anvaka/miserables
-import miserables from 'miserables';
 
-// Other loaders: 
-// https://github.com/anvaka/ngraph.generators
-// import generate from 'ngraph.generators';
+import fromJson from 'ngraph.fromjson';
+import axios from 'axios'
 
-// https://github.com/anvaka/ngraph.graph
-// import createGraph from 'ngraph.graph';
+export default function getGraph(jsonGraphFileURL) {
 
-// https://github.com/anvaka/ngraph.fromjson
-// import fromjson from 'ngraph.fromjson'
+  if ( jsonGraphFileURL == null )
+  {
+  	var jsonGraphFileURL = './2018Stories_cyto_debug.jsonviva.json';
+  }
 
-// https://github.com/anvaka/ngraph.fromdot
-// import fromdot from 'ngraph.fromdot'
+  return axios.get(jsonGraphFileURL).then( response => {
+  			console.log('finally received data!')
+  			console.log(response.data);
+  			return Promise.resolve(tryJson(response.data));
+  		});
 
-export default function getGraph() {
-  return miserables.create();
-  // return generate.wattsStrogatz(20, 5, 0.4);
+  console.log('already returned :(')
+  return null;
+
 }
 
+function tryJson(jsonContent) {
+	try {
+	  return fromJson(jsonContent);
+	} catch (e) {
+	  //eslint-disable-next-line
+	  console.log('error loading JSON: ', e)
+	  return null;
+	}
+
+}

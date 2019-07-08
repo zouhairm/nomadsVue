@@ -14,7 +14,8 @@ export default function createScene(canvas) {
   let layoutSteps = 0; // how many frames shall we run layout?
   let rafHandle;
 
-  loadGraph(getGraph());
+  getGraph(null).then(loadGraph);
+
   bus.on('load-graph', loadGraph);
 
   return {
