@@ -10,14 +10,13 @@
   },
   "dependencies": {
     "axios": "^0.19.0",
-    "fs": "0.0.1-security",
-    "miserables": "^1.0.1",
     "ngraph.events": "0.0.4",
     "ngraph.forcelayout": "^0.5.0",
     "ngraph.fromdot": "^0.4.0",
     "ngraph.fromjson": "^0.1.9",
     "ngraph.generators": "0.0.19",
     "ngraph.graph": "0.0.15",
+    "vivagraphjs": "^0.10.1",
     "vue": "^2.5.22",
     "w-gl": "^0.3.1"
   },

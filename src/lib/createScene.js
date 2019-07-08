@@ -3,8 +3,10 @@ import bus from './bus';
 import getGraph from './getGraph';
 import createLayout from 'ngraph.forcelayout';
 
+import Viva from 'vivagraphjs';
+
 export default function createScene(canvas) {
-  let drawLinks = true;
+  let drawLinks = false;
 
   // Since graph can be loaded dynamically, we have these uninitialized
   // and captured into closure. loadGraph will do the initialization
@@ -31,9 +33,14 @@ export default function createScene(canvas) {
     scene = initScene();
     graph = newGraph
 
-    layout = createLayout(graph, {
-      timeStep: 5 
+    layout = Viva.Graph.Layout.constant(graph); 
+
+    layout.placeNode(function (node) {
+      if (!node.data.orgPos) { console.log(node.data); return {x: 0, y: 0};}
+      return node.data.orgPos;
     });
+
+
 
     layout.step();
     let ui = initUIElements();
@@ -97,7 +104,7 @@ export default function createScene(canvas) {
       linkIdToUI.set(link.id, ui);
     });
 
-    scene.appendChild(lines);
+    // scene.appendChild(lines);
     scene.appendChild(nodes);
 
     return {nodeUI: nodeIdToUI, linkUI: linkIdToUI};

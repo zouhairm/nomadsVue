@@ -19,7 +19,7 @@ export default {
     },
 
     loadAllStories() {
-      var pr = getGraph('./2018Stories_cyto_debug.jsonviva.json');
+      var pr = getGraph('./2018Stories_cyto.jsonviva.json');
       pr.then(function(g) {if(g) bus.fire('load-graph', g)});
     }
   },
