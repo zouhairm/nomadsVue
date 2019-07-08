@@ -5,30 +5,22 @@
 import fromJson from 'ngraph.fromjson';
 import axios from 'axios'
 
-export default function getGraph(jsonGraphFileURL) {
+export default function getGraph(jsonGraphFileURL = './2018Stories_cyto_debug.jsonviva.json') {
 
-  if ( jsonGraphFileURL == null )
-  {
-  	var jsonGraphFileURL = './2018Stories_cyto_debug.jsonviva.json';
-  }
-
-  return axios.get(jsonGraphFileURL).then( response => {
-  			return tryJson(response.data);
-  		});
+  return axios.get(jsonGraphFileURL).then( 
+    response => {
+      return tryJson(response.data);
+  });
   //TODO: add catch handling of error ...
-
-
-  return null;
-
 }
 
 function tryJson(jsonContent) {
-	try {
-	  return fromJson(jsonContent);
-	} catch (e) {
-	  //eslint-disable-next-line
-	  console.log('error loading JSON: ', e)
-	  return null;
-	}
+  try {
+    return fromJson(jsonContent);
+  } catch (e) {
+    //eslint-disable-next-line
+    console.log('error loading JSON: ', e)
+    return null;
+  }
 
 }
