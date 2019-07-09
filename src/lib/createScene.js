@@ -79,7 +79,7 @@ function loadGraph(newGraph) {
   graphics.setNodeProgram(CircleNodeShader());
   // Change node ui model for WebGL shader
   graphics.node(n => {
-      return new WebglCircle(10, 0x009ee8ff); // hex rrggbb);
+      return new WebglCircle(10, getNodeColor(n, false)); // hex rrggbb);
    });
 
   //to avoid releasing none existant links
@@ -130,8 +130,8 @@ function loadGraph(newGraph) {
     var nodeUI = graphics.getNodeUI(node.id);
     if (high) {
       //Change node color/size
-      nodeUI.color = 0xFFA500ff;//TODO: move these to CSS or something?
-      nodeUI.size = 11;
+      nodeUI.color = getNodeColor(node, high);
+      nodeUI.size = 18;
 
       //create UI for links
       if(node.links){     
@@ -148,8 +148,8 @@ function loadGraph(newGraph) {
       }
     } else {
       //Change node color/size
-      nodeUI.color = 0x009ee8ff;
-      nodeUI.size = 10;
+      nodeUI.color = getNodeColor(node, high);
+      nodeUI.size = 16;
 
       //Remove ui for links
       //TODO: skip links we know we didn't highlight?
@@ -218,6 +218,22 @@ function zoomTo(desiredScale, currentScale) {
     }
 }
 
+function getNodeColor(node, high)
+{
+  const colors = {'EU': 0x0062ff, 'NA': 0x37ff00, 'SA': 0xfb00ff,
+                'AF': 0xffaa00, 'AS': 0xfffb00, 'OC':0xff0015,
+                'highlighted': 0xffffff, 'N/A': 0x7d7d7d}
+
+  if(high)
+  {
+    return colors['highlighted'];
+  }
+  else
+  {
+    return colors[node.data.AuthorCont] || colors['N/A'];
+  }
+}
+
 function resetView() {
   if(renderer)
   {
@@ -242,8 +258,8 @@ function resetView() {
 
 function dispose() {
   // cancelAnimationFrame(rafHandle);
-
   bus.off('load-graph', loadGraph);
 }
+
 
 } //end of Export
