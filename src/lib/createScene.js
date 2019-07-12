@@ -2,14 +2,31 @@
 
 import bus from './bus';
 
-import getGraph from './getGraph';
+import {getGraph, geoColocPositioner} from './getGraph';
 
 import {WebglCircle, CircleNodeShader} from './WebglCircleShader';
 import Viva from 'vivagraphjs';
 
 
 
-export default function createScene(canvas) {
+var traverseNodes = require('ngraph.traverse').nodes;
+var traverseLinks = require('ngraph.traverse').links;
+
+
+
+export function getNeighborhood(graph, node)
+//This will include node, its outgoing elements, and its neighbors
+{
+  var neighbors = {nodes: [node], links: []}
+
+  traverseNodes(graph).neighbors(node.id).forEach( n => neighbors.nodes.push(n))
+  traverseLinks(graph).from(node.id).forEach( l => neighbors.links.push(l))
+
+  return neighbors
+}
+
+
+export function createScene(canvas) {
 // Since graph can be loaded dynamically, we have these uninitialized
 // and captured into closure. loadGraph will do the initialization
 let graph, renderer, layout, rendererSettings;
@@ -17,9 +34,6 @@ let graph, renderer, layout, rendererSettings;
 //Save where the graph will be rendered
 rendererSettings = {
   container: canvas,
-  //by default we won't render links, 
-  //but we will later override this to provide hovering highlighting
-  renderLinks : false, 
   }
 
 //First time creating scene, use getGraph() with default
@@ -57,13 +71,7 @@ function loadGraph(newGraph) {
   layout = Viva.Graph.Layout.constant(graph);
 
   //For that, we over-write the placeNode callback
-  layout.placeNode(function (node) {
-    if (!node.data.position) { 
-      console.log(node.id + ' does not have position data! Setting to 0,0');
-      return {x: 0, y: 0};
-    }
-    return node.data.position ;
-  });
+  layout.placeNode(geoColocPositioner);
   // Run one step so that node positions are computed
   layout.step();
   rendererSettings.layout = layout;
@@ -92,92 +100,140 @@ function loadGraph(newGraph) {
   //*************** Events *******************
   //******************************************
 
-  let highlightedNodes = []
+  let highlightedElements = {nodes: [], links: [], sticky: false}
   var events = Viva.Graph.webglInputEvents(graphics, graph);
   events.mouseEnter(function (node) {
-      console.log('Mouse entered node: ' + node.id);
 
-      //Unhighlight other nodes and their links
-      highlightedNodes.forEach(oldnode => higlightNode(oldnode, false));
+      if (highlightedElements.sticky)
+      {
+        //sticky on means a node was clicked, so no highlighting to be done
 
-      //This is going to be the new highlighted 
-      highlightedNodes = [node]
-      //Highlight the new node
-      let nLinks = higlightNode(node, true)
-      //Set renderLinks to true if any links should be rendered
-      rendererSettings.renderLinks = nLinks > 0;
+        //however, we will still fire a node-hover-enter event
+        //if the node is one of the highlighted ones!
+        if(highlightedElements.nodes.includes(node))
+        {
+          //when sticky, as if we clicked (so whole story will show)
+          bus.fire('node-clicked', node)
+        }
+        return
+      }
 
-      //Force a rerender in case the layout is stable
+      clearHighlightedElements(highlightedElements)
+      highlightedElements = highlightNeighborhood(node)
       renderer.rerender()
 
-  }).mouseLeave(function (node) {        
-      console.log('Mouse left node: ' + node.id);
-      higlightNode(node, false);
+      //Tell back to main app that we have a selected node.
+      bus.fire('node-hovered', node)
 
-      rendererSettings.renderLinks = false
-      renderer.rerender()
+  // eslint-disable-next-line no-unused-vars
+  }).mouseLeave(function (node) {
+
+    if(highlightedElements.sticky)
+    {
+      // nothing to do as long as sticky is on ...
+      return
+    }
+    //Unhighlight all nodes and turn off link rendering
+    clearHighlightedElements(highlightedElements)
+    renderer.rerender()
+  })
+  .click(function (node) {
+    clearHighlightedElements(highlightedElements)
+    highlightedElements = highlightNeighborhood(node)
+    highlightedElements.sticky = true
+    bus.fire('node-clicked', node)
+
+    renderer.rerender()
   })
 
-  // .dblClick(function (node) {
-  //     higlightNode(node, false)
-  // }).click(function (node) {
-  //     higlightNode(node, true)
-  // });
+  function clearHighlightedElements(nhood)
+  {
+    nhood.nodes.forEach(n => highlightNode(n, false));
+    nhood.links.forEach(n => highlightLink(n, false));
+    rendererSettings.renderLinks = false;
 
-  function higlightNode(node, high) {
-    let nLinks = 0
+    nhood.nodes = []
+    nhood.links = []
+  }
 
+  function highlightNeighborhood(node)
+  {
+    var nhood = getNeighborhood(graph, node)
+
+    nhood.nodes.forEach(n => highlightNode(n, true))
+    nhood.links.forEach(l => highlightLink(l, true))
+    rendererSettings.renderLinks = nhood.links.length > 0
+
+    return nhood
+  }
+
+  function highlightLink(link, high) {
+    if(high){
+      // Equivalent to renderer.createLinkUi(link);
+      // but we don't have access to it
+      var linkPosition = layout.getLinkPosition(link.id);
+      graphics.addLink(link, linkPosition);
+    } else
+    {
+      // Equivalent to renderer.removeLinkUi(link);
+      // but we don't have access to it
+      graphics.releaseLink(link)
+    }
+  }
+
+  function highlightNode(node, high) {
     var nodeUI = graphics.getNodeUI(node.id);
     if (high) {
       //Change node color/size
       nodeUI.color = getNodeColor(node, high);
       nodeUI.size = 18;
-
-      //create UI for links
-      if(node.links){     
-        node.links.forEach(link => {
-          //skip non-outgoing links
-          if (link['fromId'] == node.id)
-          {          
-            // renderer.createLinkUi(link);
-            var linkPosition = layout.getLinkPosition(link.id);
-            graphics.addLink(link, linkPosition);
-            nLinks += 1
-          }
-        });
-      }
     } else {
       //Change node color/size
       nodeUI.color = getNodeColor(node, high);
       nodeUI.size = 16;
-
-      //Remove ui for links
-      //TODO: skip links we know we didn't highlight?
-      if(node.links)
-      {
-        node.links.forEach(link => {graphics.releaseLink(link)}); //renderer.removeLinkUi(link)
-      }
     }
-
-    return nLinks;
   }
+
 
   //******************************************
   //*************** Renderer *****************
   //******************************************
 
   //Finally Ready to initialize and run the renderer!
-    renderer = Viva.Graph.View.renderer(graph, rendererSettings);
+  rendererSettings.renderLinks= false;  //by default we won't render links, 
+  renderer = Viva.Graph.View.renderer(graph, rendererSettings);
 
-    if(renderer)
-    {
-      renderer.run();
-      fitAndCenter();
+  if(renderer)
+  {
+    renderer.run();
+    fitAndCenter();
+    panBackground();
+  }
 
-    }
 
 }
 
+
+function panBackground(){
+
+      let cyDiv = rendererSettings.container
+      let transform = renderer.getTransform()
+      var pan  = {x: transform.offsetX, y: transform.offsetY}
+      var zoom = transform.scale * 5;
+      
+      var ax = - 670 * zoom;
+      var ay = - 450 * zoom;
+
+      var x = pan.x + ax;
+      var y = pan.y + ay;
+
+      if(x*y != 0) return;
+
+      cyDiv.style.backgroundPosition = x +'px ' + y + 'px ';
+      cyDiv.style.backgroundSize = (window.screen.width * zoom)+'px '+(window.screen.height * zoom)+'px'; 
+
+
+}
 
 function fitAndCenter(){
   // Final bit: most likely graph will take more space than available
@@ -197,9 +253,7 @@ function fitAndCenter(){
 //From https://github.com/anvaka/VivaGraphJS/issues/57
 function zoomTo(desiredScale, currentScale) {
     // zoom API in vivagraph 0.5.x is silly. There is no way to pass transform
-    // directly. Maybe it will be fixed in future, for now this is the best I could do:
-    console.log('desired = ' + desiredScale + ' current = ' + currentScale)
-    
+    // directly. Maybe it will be fixed in future, for now this is the best I could do:    
     let newScale = currentScale;
     if (desiredScale < currentScale) {
         newScale = renderer.zoomOut();
@@ -238,8 +292,9 @@ function resetView() {
   if(renderer)
   {
     console.log('Recentering renderer')
-    // renderer.reset();
+    renderer.reset();
     fitAndCenter();
+    renderer.rerender();
   }
 }
 
