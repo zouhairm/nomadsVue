@@ -49,7 +49,7 @@
 <script>
 import {createScene} from './lib/createScene';
 import bus from './lib/bus';
-import getGraph from './lib/getGraph.js'
+// import getGraph from './lib/getGraph.js'
 
 
 import StoryView from './components/StoryView.vue'
@@ -60,7 +60,7 @@ export default {
     
     return {
       showAbout: false,
-      storyViewPars: { node: null, showdetails: false},
+      storyViewPars: { node: null, graph: null, showdetails: false},
     };
   },
 
@@ -70,8 +70,13 @@ export default {
     },
 
     loadAllStories() {
-      var pr = getGraph('./2018Stories_cyto.jsonviva.json');
-      pr.then(function(g) {if(g) bus.fire('load-graph', g)});
+      //unused ... 
+      // var pr = getGraph('./2018Stories_cyto.jsonviva.json');
+      // var self = //needed for pr.then closure
+      // pr.then(function(g) {
+      //   self.storyViewPars.graph = g
+      //   if(g) bus.fire('load-graph', g)
+      // });
     }
   },
 
@@ -103,14 +108,16 @@ export default {
     //register and handle events
     bus.on('node-hovered', nodeHovered);
     bus.on('node-clicked', nodeClicked);
-    function nodeHovered(node)
+    function nodeHovered(graph, node)
     {
+      self.storyViewPars.graph = graph;
       self.storyViewPars.node = node;
       self.storyViewPars.showdetails = false;
-
     }
-    function nodeClicked(node)
+
+    function nodeClicked(graph, node)
     {
+      self.storyViewPars.graph = graph;
       self.storyViewPars.node = node;
       self.storyViewPars.showdetails = true;
 

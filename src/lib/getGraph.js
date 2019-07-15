@@ -3,9 +3,7 @@
  */
 
 import fromJson from 'ngraph.fromjson';
-import axios from 'axios'
-
-var assert = require('assert');
+import axios from 'axios';
 
 /* MUSTDO: make the file smaller ... */
 export function getGraph(jsonGraphFileURL = './2018Stories_viva.json') {
@@ -20,13 +18,7 @@ export function getGraph(jsonGraphFileURL = './2018Stories_viva.json') {
 function tryJson(jsonContent) {
   try {
      computePositions(jsonContent)
-     var graph = fromJson(jsonContent)
-     if(graph == null)
-     {
-      console.log('wtf')
-      graph.pos = 3
-     }
-     return graph
+     return fromJson(jsonContent)
   } catch (e) {
     //eslint-disable-next-line
     console.log('error loading JSON: ', e)
@@ -87,7 +79,6 @@ function computePositions(jsonContent)
 export function geoColocPositioner (node) {
 
     if (!node.data.position) { 
-      console.log(node.id + ' does not have position data! Setting to 0,0');
       return {x: 0, y: 0};
     }
 

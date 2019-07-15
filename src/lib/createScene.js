@@ -46,6 +46,7 @@ bus.on('load-graph', loadGraph);
 
 //the scene we return has the following member functions
 return {
+  graph,
   dispose,
   resetView,
 };
@@ -83,9 +84,9 @@ function loadGraph(newGraph) {
   //We will use a webGL renderer
   //TODO: fallback to SVG if webGL not supported?
   let graphics = Viva.Graph.View.webglGraphics();
-  // graphics.linkUIBuilder = function (link) {
-  //           return Viva.Graph.View.webglLine(0xfb00ff);
-  //       }
+  graphics.link(function (link) {
+            return Viva.Graph.View.webglLine(getLineColor(link));
+        })
   // Tell webgl graphics we want to use custom shader to render nodes:
   graphics.setNodeProgram(CircleNodeShader(panBackground));
   // Change node ui model for WebGL shader
@@ -116,7 +117,7 @@ function loadGraph(newGraph) {
         if(highlightedElements.nodes.includes(node))
         {
           //when sticky, as if we clicked (so whole story will show)
-          bus.fire('node-clicked', node)
+          bus.fire('node-clicked', graph, node)
         }
         return
       }
@@ -126,7 +127,7 @@ function loadGraph(newGraph) {
       renderer.rerender()
 
       //Tell back to main app that we have a selected node.
-      bus.fire('node-hovered', node)
+      bus.fire('node-hovered', graph, node)
 
   // eslint-disable-next-line no-unused-vars
   }).mouseLeave(function (node) {
@@ -144,7 +145,7 @@ function loadGraph(newGraph) {
     clearHighlightedElements(highlightedElements)
     highlightedElements = highlightNeighborhood(node)
     highlightedElements.sticky = true
-    bus.fire('node-clicked', node)
+    bus.fire('node-clicked', graph, node)
 
     renderer.rerender()
   })
@@ -189,8 +190,7 @@ function loadGraph(newGraph) {
     
     //Change node color/size
     nodeUI.color = getNodeColor(node, high);
-    nodeUI.size  = getNodeSize(node, high);;
-
+    nodeUI.size  = getNodeSize(node, high);
   }
 
 
@@ -286,6 +286,33 @@ function getNodeColor(node, high)
     return colors[node.data.AuthorCont] || colors['N/A'];
   }
 }
+function getLineColor(link)
+{
+// 0x1f77b4ff, 0xaec7e8ff,
+// 0xff7f0eff, 0xffbb78ff,
+// 0x2ca02cff, 0x98df8aff,
+// 0xd62728ff, 0xff9896ff,
+// 0x9467bdff, 0xc5b0d5ff,
+// 0x8c564bff, 0xc49c94ff,
+// 0xe377c2ff, 0xf7b6d2ff,
+// 0x7f7f7fff, 0xc7c7c7ff,
+// 0xbcbd22ff, 0xdbdb8dff,
+// 0x17becfff, 0x9edae5ff
+  if(link.data)
+  {
+    if(link.data.mostSimilar)
+      return 0x4238ffff;
+
+    if(link.data.leastSimilar)
+      return 0xff3838ff;
+  }
+
+  return 0xdedcf2ff;
+
+}
+
+
+
 
 function resetView() {
   if(renderer)

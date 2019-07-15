@@ -1,0 +1,8 @@
+[
+    {
+      "origin": ["http://zouhairm.github.io", "https://zouhairm.github.io", "http://localhost:8080"],
+      "responseHeader": ["Content-Type"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+]

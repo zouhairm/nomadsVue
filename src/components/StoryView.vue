@@ -1,3 +1,4 @@
+
 <template>
 	<div class='info-box'>
 		<div class="ac-header">
@@ -16,15 +17,17 @@
 
     </div>
 
-
-
 		<div class="ac-storytext"> 
 			<fa-icon :icon="[ 'fas', 'book' ]"/> {{storyText}} 
 		</div>
 
     <div class="ac-related" v-if='pars.showdetails'>
-      Most Similar: {{mostSimilar}}<br>
-      Least Similar: {{leastSimilar}}
+      Related Stories: 
+      <ul style="margin-top: 3px">
+        <li><div class="ac-most" @click.prevent='goToMostSimilar'>{{mostSimilarTitle}}</div> (Most Similar)</li>
+        <li v-for="n in otherRelatedNodes"><div class="ac-other" @click.prevent='goToOtherNode(n)'>{{n.data.label}}</div></li>
+        <li><div class="ac-least" @click.prevent='goToLeastSimilar'>{{leastSimilarTitle}}</div> (Least Similar)</li>
+      </ul>
     </div>
     <div class="ac-more" @click.prevent='readMore' v-else > Continue Reading ... </div>
 
@@ -34,24 +37,101 @@
 
 <script>
 import bus from '../lib/bus';
+import jsyaml from 'js-yaml';
+import axios from 'axios';
 
 export default {
 	name: 'StoryView',
 	props: ['pars'],
 	data() {
 		return {
-			Title: 'Hello World!',
-			Author: 'Me!',
-			Text: 'lol'
+      mostSimilarNode: null,
+      leastSimilarNode: null,
+      otherRelatedNodes: [],
+      storyText: '',
 		};
 	},
+
+  watch: { 
+    pars: {
+      deep: true,
+      immediate: true, 
+      handler (pars, _oldpars) { 
+
+        //let's get story text if requested ... 
+        this.storyText = 'No story selected ...'
+        if(pars.node)
+        {
+          this.storyText = pars.node.data.Excerpt;
+          if (pars.showdetails){
+            // TODO: actually fetch the story details and show them
+            this.storyText += '<br> ... Fetching more !'
+            getStoryFullText(this.pars.node.id).then(txt => this.storyText = txt)
+          }
+        }
+
+        //we are going to extract the most/least similar nodes
+
+        //start by assuming they are null
+        this.mostSimilarNode  = null
+        this.leastSimilarNode = null
+        this.otherRelatedNodes = []
+
+        //if new node and graph are defined,
+        if (pars.node && pars.graph) {
+          //iterate over the node links and get the nodes
+          for(let i = 0; i < pars.node.links.length; ++i)
+          {
+            let l = pars.node.links[i]
+
+            //only interested in outbound links!
+            if (l.fromId != pars.node.id) continue;
+
+            let toNode = pars.graph.getNode(l.toId)
+            if ('mostSimilar' in l.data)
+            {
+              this.mostSimilarNode = toNode
+            }
+            else if ('leastSimilar' in l.data)
+            {
+              this.leastSimilarNode = toNode
+            }
+            else
+            {
+              this.otherRelatedNodes.push(toNode)
+            }
+          }//endfor
+        }//endif
+      }//end handler
+    }//end pars
+  },//end watch
+
+
 	methods:
   {
     readMore(){
       //pretend node was clicked which will get App.vue to trigger on that node
       //therefore this component will re-render but with showdetails = true...
       //hacky, but that's because we're not allowed to change showdetails as its a prop :s
-      bus.fire('node-clicked', this.pars.node);
+      bus.fire('node-clicked', this.pars.graph, this.pars.node);
+    },
+
+    goToOtherNode(node){
+      if(node)
+      {
+        bus.fire('node-clicked', this.pars.graph, node);
+      }
+    },
+    goToLeastSimilar(){
+      if (this.leastSimilarNode){
+        bus.fire('node-clicked', this.pars.graph, this.leastSimilarNode);
+      }
+    },
+
+    goToMostSimilar(){
+      if (this.mostSimilarNode){
+        bus.fire('node-clicked', this.pars.graph, this.mostSimilarNode);
+      }
     }
   },
 
@@ -65,38 +145,38 @@ export default {
 			return {label: 'No story selected ...'}
 		},
 
-		storyText(){
-			if(this.pars.node)
-			{
-				if (this.pars.showdetails)
-				{
-					// TODO: actually fetch the story details and show them
-					return this.pars.node.data.Excerpt;
-				}
-				else
-				{
-					return this.pars.node.data.Excerpt;
-				}
-			}
-			return 'No story selected ...'
-		},
 
-    mostSimilar(){
-      if(this.pars.node)
+
+    mostSimilarTitle(){
+      if(this.mostSimilarNode)
       {
-        return 'Need to find most similar story!'
+        return this.mostSimilarNode.data.label
       }
-      return 'None'
+      return 'None?'
     },
-    leastSimilar(){
-      if(this.pars.node)
+
+    leastSimilarTitle(){
+      if(this.leastSimilarNode)
       {
-        return 'Need to find least similar story!'
+        return this.leastSimilarNode.data.label
       }
-      return 'None'
+      return 'None?'
     }
 	}
 }
+
+
+
+function getStoryFullText(node_id, year = '2018')
+{
+  let storageURL = 'https://storage.googleapis.com/nomadstories/dataFolder/'
+  storageURL += year + '/'
+  storageURL += encodeURIComponent(node_id)
+
+  return axios.get(storageURL).then( 
+      response => { return jsyaml.load(response.data)['Text'];});
+}
+
 
 
 </script>
@@ -107,12 +187,12 @@ export default {
   position: absolute;
   left: 8px;
   padding: 14px;
-  top: 64px;
+  top: 2vh;
   width: 420px;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
 
-  max-height: 78vh;
+  max-height: 96vh;
   overflow-y: auto;
 }
 
@@ -129,15 +209,40 @@ export default {
   margin: 8px;
 }
 
-.ac-related,
+
 .ac-more {
   cursor: pointer;
   color: blue;
 }
 
+.ac-related {
+  display: inline
+}
+
+.ac-other,
+.ac-most
+
+{
+  cursor: pointer;
+  color: blue;
+  display: inline;
+}
+.ac-least
+{
+  cursor: pointer;
+  color: red;
+  display: inline;
+}
+
 .ac-storytext{
   margin: 20px 0px;
   white-space: pre-line;
+
+  max-height: 25vw;
+  overflow-y: scroll;
+
+  background: rgba(150, 150, 150, 0.4);
+
 }
 
 </style>
