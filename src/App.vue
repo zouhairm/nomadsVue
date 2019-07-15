@@ -59,7 +59,7 @@ export default {
   data() {
     
     return {
-      showAbout: true,
+      showAbout: false,
       storyViewPars: { node: null, showdetails: false},
     };
   },
@@ -166,7 +166,7 @@ body {
   bottom: 0;
   background-color: gray;
 
-  background: #000000d9 url('/world-map-blank.png') no-repeat;
+  background: #000000d9 url('/world-map-equirectangular.png') no-repeat;
   background-attachment: fixed;
   background-position: 0px 0px;
   background-size: 1460px 912px;

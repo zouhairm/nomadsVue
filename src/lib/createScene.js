@@ -83,11 +83,14 @@ function loadGraph(newGraph) {
   //We will use a webGL renderer
   //TODO: fallback to SVG if webGL not supported?
   let graphics = Viva.Graph.View.webglGraphics();
+  // graphics.linkUIBuilder = function (link) {
+  //           return Viva.Graph.View.webglLine(0xfb00ff);
+  //       }
   // Tell webgl graphics we want to use custom shader to render nodes:
-  graphics.setNodeProgram(CircleNodeShader());
+  graphics.setNodeProgram(CircleNodeShader(panBackground));
   // Change node ui model for WebGL shader
   graphics.node(n => {
-      return new WebglCircle(10, getNodeColor(n, false)); // hex rrggbb);
+      return new WebglCircle(getNodeSize(n, false), getNodeColor(n, false)); // hex rrggbb);
    });
 
   //to avoid releasing none existant links
@@ -183,15 +186,11 @@ function loadGraph(newGraph) {
 
   function highlightNode(node, high) {
     var nodeUI = graphics.getNodeUI(node.id);
-    if (high) {
-      //Change node color/size
-      nodeUI.color = getNodeColor(node, high);
-      nodeUI.size = 18;
-    } else {
-      //Change node color/size
-      nodeUI.color = getNodeColor(node, high);
-      nodeUI.size = 16;
-    }
+    
+    //Change node color/size
+    nodeUI.color = getNodeColor(node, high);
+    nodeUI.size  = getNodeSize(node, high);;
+
   }
 
 
@@ -207,31 +206,24 @@ function loadGraph(newGraph) {
   {
     renderer.run();
     fitAndCenter();
-    panBackground();
   }
-
 
 }
 
 
-function panBackground(){
+function panBackground(e){
+
+      let zoom = e[0]
+      let pan = {x: (e[12]+1)/2, y: -(e[13]+1)/2+1}
+
+      // console.log('zoom = ' + zoom + ' pan = ' + pan.x + ',' + pan.y)
+
+      var x =  pan.x * 100 - 2200*zoom/3
+      var y =  pan.y * 100 - 3250*zoom/3
 
       let cyDiv = rendererSettings.container
-      let transform = renderer.getTransform()
-      var pan  = {x: transform.offsetX, y: transform.offsetY}
-      var zoom = transform.scale * 5;
-      
-      var ax = - 670 * zoom;
-      var ay = - 450 * zoom;
-
-      var x = pan.x + ax;
-      var y = pan.y + ay;
-
-      if(x*y != 0) return;
-
-      cyDiv.style.backgroundPosition = x +'px ' + y + 'px ';
-      cyDiv.style.backgroundSize = (window.screen.width * zoom)+'px '+(window.screen.height * zoom)+'px'; 
-
+      cyDiv.style.backgroundPosition = x +'vw ' + y + 'vh ';
+      cyDiv.style.backgroundSize = (1500 * zoom)+'vw auto'//+(window.screen.height * zoom)+'px'; 
 
 }
 
@@ -272,6 +264,13 @@ function zoomTo(desiredScale, currentScale) {
     }
 }
 
+function getNodeSize(node, high)
+{
+  if (high)
+    return 15;
+  else
+    return 10;
+}
 function getNodeColor(node, high)
 {
   const colors = {'EU': 0x0062ff, 'NA': 0x37ff00, 'SA': 0xfb00ff,

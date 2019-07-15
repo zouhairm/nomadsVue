@@ -12,7 +12,7 @@ export function WebglCircle(size, color) {
 
 // Next comes the hard part - implementation of API for custom shader
 // program, used by webgl renderer:
-export function CircleNodeShader() {
+export function CircleNodeShader(transformCallBack = null) {
     // For each primitive we need 4 attributes: x, y, color and size.
     var ATTRIBUTES_PER_PRIMITIVE = 4,
         nodesFS = [
@@ -36,7 +36,7 @@ export function CircleNodeShader() {
         'varying vec4 color;',
         'void main(void) {',
         '   gl_Position = u_transform * vec4(a_vertexPos/u_screenSize, 0, 1);',
-        '   gl_PointSize = a_customAttributes[1] * u_transform[0][0];',
+        '   gl_PointSize = a_customAttributes[1] * sqrt(u_transform[0][0]);',
         '   float c = a_customAttributes[0];',
         '   color.b = mod(c, 256.0); c = floor(c/256.0);',
         '   color.g = mod(c, 256.0); c = floor(c/256.0);',
@@ -53,6 +53,9 @@ export function CircleNodeShader() {
         nodesCount = 0,
         canvasWidth, canvasHeight, transform,
         isCanvasDirty;
+
+    var transformCB = transformCallBack;
+
     return {
         /**
          * Called by webgl renderer to load the shader into gl context.
@@ -103,6 +106,10 @@ export function CircleNodeShader() {
         updateTransform : function (newTransform) {
             transform = newTransform;
             isCanvasDirty = true;
+            if (transformCB)
+            {
+                transformCB(newTransform)
+            }
         },
         /**
          * Called by webgl renderer when user resizes the canvas with nodes.

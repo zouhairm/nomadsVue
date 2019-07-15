@@ -1,53 +1,42 @@
-# graph starter
+# Scraping
+Files are obtained from the submissions of writers to the travel nomad website
+Code is inside the ./scraper folder.
+Took about ~4 hours of coding and ~24 hrs to download (slow connection while travelling in Sri Lanka :p)
 
-A simple starter project to build your own graph algorithm exploration. 
 
-![demo](https://i.imgur.com/zqXvkvW.gif)
+# NLP
 
-It allows you to load any graph from a .dot file, do a basic graph layout, and supports pan/zoom interaction.
-The rest is up to you. 
+still work in progress ... for now, using doc2vec 
 
-I was using this as a skeleton for some of my graph explorations and I hope you find this useful as a first
-graph setup.
+* Build a classifier and a way to explore the corpus of stories. Perhaps associate each cluster with some images (pulled from Web?)
+* Come up with one sentence summaries for each of the stories? Is there such a thing as an SVD for doc2Vec?
 
-Happy exploration!
+other options (might require more of a server side)
+* Generate new stories based on a "seed" sentence?
 
-## Getting started
+# Visualizing
+Also work in progress. Experimenting with Cytoscape. Some ideas:
 
-First - you need to clone/fork this repository and then:
+* Allow easy exploring of stories - filter by author country, set in country, topic, etc.
+* Make it possible to find "most similar story" or "least similar story". Maybe this is visualized by edges somehow?
 
-```
-npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+# Running locally
+cd storiesViz
+python -m http.server
 
-This should render a simple graph and you can do some basic layout. You can drop `.dot` files into it
-to load new graphs.
+# Deploying
+Host the storiesViz folder on a webserver (AWS, GCloud, etc.)
 
-From this point - you are free to modify the project as you wish. 
 
-### Compiles and minifies for production
-```
-npm run build
-```
+# Readings & References:
 
-### Customize vue configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+https://www.datanovia.com/en/lessons/determining-the-optimal-number-of-clusters-3-must-know-methods/
 
-## What's inside?
+https://medium.com/@david.campion/text-generation-using-bidirectional-lstm-and-doc2vec-models-2-3-f0fc07ee7b30
 
-* [ngraph.graph](https://github.com/anvaka/ngraph.graph) as a graph data structure
-* [ngraph.fromdot](https://github.com/anvaka/ngraph.fromdot) loads `.dot` files
-* [panzoom](https://github.com/anvaka/panzoom) for pan/zoom interaction
-* [ngraph.forcelayout](https://github.com/anvaka/ngraph.forcelayout) for the basic graph layout
-* [w-gl](https://github.com/anvaka/w-gl) - super duper obscure (and fast) WebGL renderer that can render dots and lines.
-* vue.js powered UI and dev tools.
+https://radimrehurek.com/gensim/
 
-## Thanks!
+[Distributed Representations of Sentences and Documents](https://arxiv.org/pdf/1405.4053.pdf)
 
-* Stay tuned for updates: https://twitter.com/anvaka
-* If you like my work and would like to support it - https://www.patreon.com/anvaka
+[An Empirical Evaluation of doc2vec with Practical Insights into Document Embedding Generation](https://www.aclweb.org/anthology/W16-1609)	
