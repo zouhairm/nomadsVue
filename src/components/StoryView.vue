@@ -115,24 +115,24 @@ export default {
       //pretend node was clicked which will get App.vue to trigger on that node
       //therefore this component will re-render but with showdetails = true...
       //hacky, but that's because we're not allowed to change showdetails as its a prop :s
-      bus.fire('emulate-node-clicked', this.pars.node);
+      bus.fire('emulate-node-click', this.pars.node);
     },
 
     goToOtherNode(node){
       if(node)
       {
-        bus.fire('emulate-node-clicked', node);
+        bus.fire('emulate-node-click', node);
       }
     },
     goToLeastSimilar(){
       if (this.leastSimilarNode){
-        bus.fire('emulate-node-clicked', this.leastSimilarNode);
+        bus.fire('emulate-node-click', this.leastSimilarNode);
       }
     },
 
     goToMostSimilar(){
       if (this.mostSimilarNode){
-        bus.fire('emulate-node-clicked', this.mostSimilarNode);
+        bus.fire('emulate-node-click', this.mostSimilarNode);
       }
     }
   },
@@ -196,13 +196,14 @@ function getStoryFullText(node_id, year = '2018')
 
   max-height: 96vh;
   overflow-y: auto;
+  border-radius: 2%;
 }
 
 
 .ac-header {
   font-size: 1.25em;
   text-align: center;
-  margin: 20px
+  margin: 0px
 }
 
 .ac-setin,

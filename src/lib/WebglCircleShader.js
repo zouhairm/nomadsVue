@@ -4,17 +4,18 @@ import Viva from 'vivagraphjs';
 
 
 // Lets start from the easiest part - model object for node ui in webgl
-export function WebglCircle(size, color) {
+export function WebglCircle(size, color, alpha = 1.) {
     this.size = size;
     this.color = color;
+    this.alpha = alpha;
 }
 
 
 // Next comes the hard part - implementation of API for custom shader
 // program, used by webgl renderer:
 export function CircleNodeShader(transformCallBack = null) {
-    // For each primitive we need 4 attributes: x, y, color and size.
-    var ATTRIBUTES_PER_PRIMITIVE = 4,
+    // For each primitive we need 4 attributes: x, y, color, size, and alpha.
+    var ATTRIBUTES_PER_PRIMITIVE = 5,
         nodesFS = [
         'precision mediump float;',
         'varying vec4 color;',
@@ -30,7 +31,7 @@ export function CircleNodeShader(transformCallBack = null) {
         // Pack color and size into vector. First elemnt is color, second - size.
         // Since it's floating point we can only use 24 bit to pack colors...
         // thus alpha channel is dropped, and is always assumed to be 1.
-        'attribute vec2 a_customAttributes;',
+        'attribute vec3 a_customAttributes;',
         'uniform vec2 u_screenSize;',
         'uniform mat4 u_transform;',
         'varying vec4 color;',
@@ -41,7 +42,7 @@ export function CircleNodeShader(transformCallBack = null) {
         '   color.b = mod(c, 256.0); c = floor(c/256.0);',
         '   color.g = mod(c, 256.0); c = floor(c/256.0);',
         '   color.r = mod(c, 256.0); c = floor(c/256.0); color /= 255.0;',
-        '   color.a = 1.0;',
+        '   color.a = a_customAttributes[2];',
         '}'].join('\n');
     var program,
         webglUtils,
@@ -82,6 +83,8 @@ export function CircleNodeShader(transformCallBack = null) {
             nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 1] = -pos.y;
             nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 2] = nodeUI.color;
             nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 3] = nodeUI.size;
+            nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 4] = nodeUI.alpha;
+
         },
         /**
          * Request from webgl renderer to actually draw our stuff into the
@@ -97,7 +100,7 @@ export function CircleNodeShader(transformCallBack = null) {
                 gl.uniform2f(locations.screenSize, canvasWidth, canvasHeight);
             }
             gl.vertexAttribPointer(locations.vertexPos, 2, gl.FLOAT, false, ATTRIBUTES_PER_PRIMITIVE * Float32Array.BYTES_PER_ELEMENT, 0);
-            gl.vertexAttribPointer(locations.customAttributes, 2, gl.FLOAT, false, ATTRIBUTES_PER_PRIMITIVE * Float32Array.BYTES_PER_ELEMENT, 2 * 4);
+            gl.vertexAttribPointer(locations.customAttributes, 3, gl.FLOAT, false, ATTRIBUTES_PER_PRIMITIVE * Float32Array.BYTES_PER_ELEMENT, 2 * 4);
             gl.drawArrays(gl.POINTS, 0, nodesCount);
         },
         /**

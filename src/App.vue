@@ -20,7 +20,8 @@
             A NN (LSTM w/ Doc2Vec) was trained on the stories to find relations between them. When a story is selected, the 4-most similar as well as the least similar story to it are highlighted.<br><br>
 
             Hopefully this makes the submissions of these aspiring writers fun to explore.
-            Go Ahead - enter a search term in the box above or explore the map: hover on stories, and enjoy reading them!</p>
+            Go Ahead - Explore the map, hover on stories, search for keywords, and enjoy reading the stories!<br>
+            P.S. If you get lost or the screen bugs up, just double click to reset!</p>
 
         This is made possible thanks to the following packages/data
         <ul>
@@ -62,7 +63,7 @@ export default {
     
     return {
       scene: null,
-      showAbout: false,
+      showAbout: true,
       graph: null,
       storyViewPars: { node: null, graph: null, showdetails: false},
     };
@@ -97,8 +98,10 @@ export default {
     StoryView,
   },
 
+  created(){
+    bus.on('load-graph', g => {this.graph = g;});
+  },
   mounted() {
-    bus.on('load-graph', g => {this.graph = g; console.warn('got a new graph in App.vue')});
 
     const canvas = document.getElementById('cnv');
     this.scene = createScene(canvas);

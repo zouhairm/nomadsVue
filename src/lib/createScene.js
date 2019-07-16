@@ -43,7 +43,7 @@ rendererSettings = {
 //event if graph is changed
 bus.on('load-graph', loadGraph);
 bus.on('emulate-node-click', clickHandler)
-bus.on('emulate-node-hover', clickHandler)
+bus.on('emulate-node-hover', hoverHandler)
 
 //First time creating scene, use getGraph() with default
 //parameters. getGraph will fire load-graph ...
@@ -96,7 +96,8 @@ function loadGraph(newGraph) {
   graphics.setNodeProgram(CircleNodeShader(panBackground));
   // Change node ui model for WebGL shader
   graphics.node(n => {
-      return new WebglCircle(getNodeSize(n, false), getNodeColor(n, false)); // hex rrggbb);
+      let ca = getNodeColorAlpha(n, false)
+      return new WebglCircle(getNodeSize(n, false), ca.color, ca.alpha);
    });
 
   //to avoid releasing none existant links
@@ -127,13 +128,7 @@ function loadGraph(newGraph) {
         return
       }
 
-      clearHighlightedElements(highlightedElements)
-      highlightedElements = highlightNeighborhood(node)
-      renderer.rerender()
-
-      //Tell back to main app that we have a selected node.
-      bus.fire('node-hovered', node)
-
+      hoverHandler(node)
   // eslint-disable-next-line no-unused-vars
   }).mouseLeave(function (node) {
 
@@ -147,9 +142,17 @@ function loadGraph(newGraph) {
     renderer.rerender()
   })
   .click(function (node) {
-    clickHandler(node)
+    if(highlightedElements.sticky){
+      if (highlightedElements.nodes.includes(node))
+        clickHandler(node)
+    } else{
+       clickHandler(node)
+    }
+
   })
 
+
+  canvas.ondblclick = resetAllNodes
   //******************************************
   //*************** Renderer *****************
   //******************************************
@@ -167,15 +170,37 @@ function loadGraph(newGraph) {
 }
 
 
+function resetAllNodes()
+{
+  clearHighlightedElements(highlightedElements)
+  highlightedElements.sticky = false
 
-function clickHandler(node)
+  graph.forEachNode(n => highlightNode(n, false))
+
+  fitAndCenter();
+  renderer.rerender()
+
+}
+
+function hoverHandler(node)
 {
   clearHighlightedElements(highlightedElements)
   highlightedElements = highlightNeighborhood(node)
-  highlightedElements.sticky = true
-  bus.fire('node-clicked', node)
-
   renderer.rerender()
+
+  bus.fire('node-hovered', node)
+}
+function clickHandler(node)
+{
+  clearHighlightedElements(highlightedElements)
+
+  graph.forEachNode(hideNode)
+
+  highlightedElements = highlightNeighborhood(node)
+  highlightedElements.sticky = true
+  renderer.rerender()
+
+  bus.fire('node-clicked', node)
 }
 
 function clearHighlightedElements(nhood)
@@ -213,12 +238,24 @@ function highlightLink(link, high) {
   }
 }
 
+function hideNode(node)
+{
+  var nodeUI = graphics.getNodeUI(node.id);
+  nodeUI.alpha = 0.;
+  // nodeUI.size  = 0;
+}
+
 function highlightNode(node, high) {
   var nodeUI = graphics.getNodeUI(node.id);
   
   //Change node color/size
-  nodeUI.color = getNodeColor(node, high);
+
+  let ca = getNodeColorAlpha(node, high);
+  nodeUI.color = ca.color;
+  nodeUI.alpha = ca.alpha;
+
   nodeUI.size  = getNodeSize(node, high);
+
 }
 
 
@@ -284,20 +321,15 @@ function getNodeSize(node, high)
   else
     return 12;
 }
-function getNodeColor(node, high)
+function getNodeColorAlpha(node, high)
 {
   const colors = {'EU': 0x0062ff, 'NA': 0x37ff00, 'SA': 0xfb00ff,
                 'AF': 0xffaa00, 'AS': 0xfffb00, 'OC':0xff0015,
                 'highlighted': 0xffffff, 'N/A': 0x7d7d7d}
 
-  if(high)
-  {
-    return colors['highlighted'];
-  }
-  else
-  {
-    return colors[node.data.AuthorCont] || colors['N/A'];
-  }
+
+  return {color: colors[node.data.AuthorCont] || colors['N/A'], 
+          alpha: high ? .8: .5}
 }
 function getLineColor(link)
 {

@@ -8,12 +8,12 @@
         <input v-model="searchPattern" 
               @focus="searchInputFocused = true"
               @blur="unfocusTimeout"
-        type="text" class="form-control no-shadow" placeholder="Search Stories">
+        type="text" class="form-control no-shadow" placeholder="Search Stories" />
 
-        <span class="input-group-btn">
-            <button class="btn" tabindex="-1" type="button"><fa-icon :icon="[ 'fas', 'search' ]"/>
+        <div class="input-group-btn" style="display: inline">
+            <button style="height: 26px;" class="btn" tabindex="-1" type="button"><fa-icon :icon="[ 'fas', 'search' ]"/>
             </button>
-        </span>
+        </div>
       </div>
     </form>
 
@@ -213,7 +213,7 @@ function compileRegex(pattern) {
     border-radius: 0;
     border: 0;
     line-height: 25px;
-    font-size:14;
+    font-size: 14pt;
   };
 .search-form .input-group {
   display: inline-flex;
@@ -226,12 +226,15 @@ function compileRegex(pattern) {
     }
   }
 };
-.input-group .btn {
+
+/*
+For some reason this is not working ...
+.search-form .input-group .input-group-btn {
   color: white;
   border-radius: 0;
-  /*background: #808080;*/
   height: 25px;
-}
+  display: inline;
+}*/
 
 
 
