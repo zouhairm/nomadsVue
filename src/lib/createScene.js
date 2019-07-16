@@ -1,4 +1,4 @@
-/*eslint no-console: ["error", { allow: ["log", "warn", "error"] }] */
+/*eslint no-console: ["error", { allow: [ "warn", "error"] }] */
 
 import bus from './bus';
 
@@ -36,19 +36,21 @@ rendererSettings = {
   container: canvas,
   }
 
-//First time creating scene, use getGraph() with default
-//parameters and load it.
-getGraph().then(loadGraph);
 
 //Use event handler to register for a load-graph
 //event if graph is changed
 bus.on('load-graph', loadGraph);
+
+//First time creating scene, use getGraph() with default
+//parameters. getGraph will fire load-graph ...
+getGraph()
 
 //the scene we return has the following member functions
 return {
   graph,
   dispose,
   resetView,
+  toggleLayout,
 };
 
 
@@ -269,7 +271,7 @@ function getNodeSize(node, high)
   if (high)
     return 15;
   else
-    return 10;
+    return 12;
 }
 function getNodeColor(node, high)
 {
@@ -313,11 +315,29 @@ function getLineColor(link)
 
 
 
+function toggleLayout(){
+  //doesn't seem to be working ...
+  //might need to do something different to change renderer?
+  
+  if(renderer)
+  {
+    var newLayout = Viva.Graph.Layout.forceDirected(graph, {
+        springLength : 10,
+        springCoeff : 0.0005,
+        dragCoeff : 0.02,
+        gravity : -1.2
+    });
 
+    renderer.reset();
+    renderer.layout = newLayout;
+    renderer.layout.step()
+    renderer.rerender();
+
+  }
+}
 function resetView() {
   if(renderer)
   {
-    console.log('Recentering renderer')
     renderer.reset();
     fitAndCenter();
     renderer.rerender();

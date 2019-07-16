@@ -25,7 +25,7 @@
       Related Stories: 
       <ul style="margin-top: 3px">
         <li><div class="ac-most" @click.prevent='goToMostSimilar'>{{mostSimilarTitle}}</div> (Most Similar)</li>
-        <li v-for="n in otherRelatedNodes"><div class="ac-other" @click.prevent='goToOtherNode(n)'>{{n.data.label}}</div></li>
+        <li v-for="n in otherRelatedNodes" :key="n.id"><div class="ac-other" @click.prevent='goToOtherNode(n)'>{{n.data.label}}</div></li>
         <li><div class="ac-least" @click.prevent='goToLeastSimilar'>{{leastSimilarTitle}}</div> (Least Similar)</li>
       </ul>
     </div>
@@ -56,7 +56,7 @@ export default {
     pars: {
       deep: true,
       immediate: true, 
-      handler (pars, _oldpars) { 
+      handler (pars, _oldpars) {  /* eslint-disable-line no-unused-vars */
 
         //let's get story text if requested ... 
         this.storyText = 'No story selected ...'

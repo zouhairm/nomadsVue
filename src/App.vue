@@ -1,15 +1,15 @@
 <template>
   <div id="app">
     <div id="cnv"></div>
-
-<!--     <div id="controls">
-      <a href="#" @click.prevent='resetView' class='btn-command'>Reset View</a>
-      <a href="#" @click.prevent='loadAllStories' class='btn-command'>Load All Stories!</a>
+<!-- 
+    <div id="controls">
+      <a href="#" @click.prevent='toggleLayout' class='btn-command'>Reset Layout</a>
     </div> -->
 
 
     <story-view id='story' :pars='storyViewPars'  v-if='showStory'> </story-view>
 
+    <search-view id='search'></search-view>
 
     <div id='about' class='about-box' v-if='showAbout'>
         <h2>About Project</h2>
@@ -52,19 +52,24 @@ import bus from './lib/bus';
 // import getGraph from './lib/getGraph.js'
 
 
-import StoryView from './components/StoryView.vue'
+import StoryView  from './components/StoryView.vue'
+import SearchView from './components/SearchView.vue'
 
 export default {
   name: 'app',
   data() {
     
     return {
+      scene: null,
       showAbout: false,
       storyViewPars: { node: null, graph: null, showdetails: false},
     };
   },
 
   methods: {
+    toggleLayout(){
+      this.scene.toggleLayout();
+    },
     resetView() {
       this.scene.resetView()
     },
@@ -94,7 +99,8 @@ export default {
 
   components:
   {
-    StoryView
+    StoryView,
+    SearchView,
   },
 
   mounted() {

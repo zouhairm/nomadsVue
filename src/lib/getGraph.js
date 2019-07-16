@@ -5,12 +5,15 @@
 import fromJson from 'ngraph.fromjson';
 import axios from 'axios';
 
+import bus from './bus';
+
 /* MUSTDO: make the file smaller ... */
 export function getGraph(jsonGraphFileURL = './2018Stories_viva.json') {
 
   return axios.get(jsonGraphFileURL).then( 
     response => {
-      return tryJson(response.data);
+      let g = tryJson(response.data);
+      bus.fire('load-graph', g)
   });
   //TODO: add catch handling of error ...
 }
@@ -21,7 +24,7 @@ function tryJson(jsonContent) {
      return fromJson(jsonContent)
   } catch (e) {
     //eslint-disable-next-line
-    console.log('error loading JSON: ', e)
+    console.error('error loading JSON: ', e)
     return null;
   }
 
@@ -89,7 +92,7 @@ export function geoColocPositioner (node) {
 
 //Implementation of https://en.wikipedia.org/wiki/Nicolosi_globular_projection
 //Taken from here: http://www.jhlabs.com/java/maps/proj/
-function NicolosiProjection(lon,  lat) {
+function NicolosiProjection(lon,  lat) { /* eslint-disable-line no-unused-vars */
   var out = {}
 
   const EPS = 1e-10;
