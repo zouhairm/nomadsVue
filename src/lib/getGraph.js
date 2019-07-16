@@ -9,7 +9,6 @@ import bus from './bus';
 
 /* MUSTDO: make the file smaller ... */
 export function getGraph(jsonGraphFileURL = './2018Stories_viva.json') {
-
   return axios.get(jsonGraphFileURL).then( 
     response => {
       let g = tryJson(response.data);

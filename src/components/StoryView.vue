@@ -185,6 +185,11 @@ function getStoryFullText(node_id, year = '2018')
 
 
 <style>
+* {
+    box-sizing: border-box;
+    z-index: 1; /* this might backfire? */
+}
+
 .info-box {
   position: absolute;
   left: 8px;

@@ -144,6 +144,11 @@ function compileRegex(pattern) {
 </script>
 
 <style>
+* {
+    box-sizing: border-box;
+    z-index: 1; /* this might backfire? */
+}
+
 .search {
   position: absolute;
   top: 2vh;

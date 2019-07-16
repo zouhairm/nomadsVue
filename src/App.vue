@@ -140,9 +140,7 @@ export default {
 </script>
 
 <style>
-*,
-*::before,
-*::after {
+* {
     box-sizing: border-box;
     z-index: 1; /* this might backfire? */
 }
@@ -176,7 +174,7 @@ body {
   bottom: 0;
   background-color: gray;
 
-  background: #000000d9 url('/world-map-equirectangular.png') no-repeat;
+  background: #000000d9 url('assets/world-map-equirectangular.png') no-repeat;
   background-attachment: fixed;
   background-position: 0px 0px;
   background-size: 1460px 912px;
