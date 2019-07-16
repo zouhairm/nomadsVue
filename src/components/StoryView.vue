@@ -67,7 +67,7 @@ export default {
           this.storyText = pars.node.data.Excerpt;
           if (pars.showdetails){
             // TODO: actually fetch the story details and show them
-            this.storyText += '<br> ... Fetching more !'
+            this.storyText += ' (... Fetching more of the story ...)'
             getStoryFullText(this.pars.node.id).then(txt => this.storyText = txt)
           }
         }
@@ -202,6 +202,8 @@ function getStoryFullText(node_id, year = '2018')
   max-height: 96vh;
   overflow-y: auto;
   border-radius: 2%;
+  z-index: 1;
+
 }
 
 

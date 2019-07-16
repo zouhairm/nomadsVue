@@ -25,12 +25,12 @@
 
         This is made possible thanks to the following packages/data
         <ul>
-            <li><a href="https://www.worldnomads.com/create/scholarships/writing/2018/results">Travel Nomad Stories</a></li>
+            <li><a target="_blank" href="https://www.worldnomads.com/create/scholarships/writing/2018/results">Travel Nomad Stories</a></li>
             <li><a target="_blank" href="https://radimrehurek.com/gensim/models/doc2vec.html">GenSim (Doc2Vec)</a></li>
             <li><a target="_blank" href="https://github.com/vuejs/awesome-vue">Vue.js</a></li>
             <li><a target="_blank" href="https://github.com/anvaka/VivaGraphJS">VivaGraphJS (w/ WebGL renderer)</a></li>
         </ul>
-        <p>For technical details, check out this <a href="https://zouhairm.github.io/writerBlock">Blog Post</a></p>
+        <p>For technical details, check out this <a target="_blank" href="https://zouhairm.github.io/writerBlock">Blog Post</a></p>
         </div>
         <a href='#' @click.prevent='showAbout = false'  class='close-about' title='Close this message'>Close</a>
     </div>
@@ -182,14 +182,6 @@ body {
 canvas{ position: relative; z-index: 1 }
 
 
-#controls
-{
-  position: absolute;
-  top: 10%;
-  width: 30%;
-  padding: 4px;
-}
-
 .btn-command {
   display: block;
   width: 20%;
@@ -208,22 +200,14 @@ a {
 }
 
 
-#header {
-    text-align: center;
-    background: #6DAEE1;
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 28px;
-    color : white;
-}
-
 .footer {
   position: absolute;
   width: 100%;
   left: 10px;
   bottom : 9px;
   display: flex;
+  z-index: 1;
+
 }
 
 .copyText {
@@ -240,6 +224,7 @@ a {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 5%;
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
+  z-index: 1;
 
 }
 .about-link {
@@ -248,6 +233,7 @@ a {
   margin-right: 5px;
   border-radius: 5%;
   cursor: pointer;
+  z-index: 1;
 }
 .close-about {
   float: right;

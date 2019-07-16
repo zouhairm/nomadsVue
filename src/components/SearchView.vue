@@ -154,6 +154,7 @@ function compileRegex(pattern) {
   top: 2vh;
   right: 3vw;
   width: 25vw;
+  z-index: 1;
 }
 .search .search-results {
   padding-top: 5px;
@@ -212,7 +213,7 @@ function compileRegex(pattern) {
 }
 
 .search-form input {
-    width: 23vw;
+    width: 21vw;
     background: rgba(26, 26, 26, 0.5);
     color: white;
     border-radius: 0;
