@@ -47,9 +47,10 @@
 </template>
 
 <script>
+/*eslint no-console: ["error", { allow: [ "warn", "error"] }] */
+
 import {createScene} from './lib/createScene';
 import bus from './lib/bus';
-// import getGraph from './lib/getGraph.js'
 
 
 import StoryView  from './components/StoryView.vue'
@@ -62,9 +63,11 @@ export default {
     return {
       scene: null,
       showAbout: false,
+      graph: null,
       storyViewPars: { node: null, graph: null, showdetails: false},
     };
   },
+
 
   methods: {
     toggleLayout(){
@@ -74,15 +77,6 @@ export default {
       this.scene.resetView()
     },
 
-    loadAllStories() {
-      //unused ... 
-      // var pr = getGraph('./2018Stories_cyto.jsonviva.json');
-      // var self = //needed for pr.then closure
-      // pr.then(function(g) {
-      //   self.storyViewPars.graph = g
-      //   if(g) bus.fire('load-graph', g)
-      // });
-    }
   },
 
   computed:
@@ -99,11 +93,13 @@ export default {
 
   components:
   {
-    StoryView,
     SearchView,
+    StoryView,
   },
 
   mounted() {
+    bus.on('load-graph', g => {this.graph = g; console.warn('got a new graph in App.vue')});
+
     const canvas = document.getElementById('cnv');
     this.scene = createScene(canvas);
 
@@ -114,16 +110,14 @@ export default {
     //register and handle events
     bus.on('node-hovered', nodeHovered);
     bus.on('node-clicked', nodeClicked);
-    function nodeHovered(graph, node)
+    function nodeHovered(node)
     {
-      self.storyViewPars.graph = graph;
       self.storyViewPars.node = node;
       self.storyViewPars.showdetails = false;
     }
 
-    function nodeClicked(graph, node)
+    function nodeClicked(node)
     {
-      self.storyViewPars.graph = graph;
       self.storyViewPars.node = node;
       self.storyViewPars.showdetails = true;
 

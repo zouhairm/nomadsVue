@@ -36,6 +36,7 @@
 
 
 <script>
+/*eslint no-console: ["error", { allow: [ "warn", "error"] }] */
 import bus from '../lib/bus';
 import jsyaml from 'js-yaml';
 import axios from 'axios';
@@ -48,6 +49,7 @@ export default {
       mostSimilarNode: null,
       leastSimilarNode: null,
       otherRelatedNodes: [],
+      graph: null,
       storyText: '',
 		};
 	},
@@ -78,7 +80,7 @@ export default {
         this.otherRelatedNodes = []
 
         //if new node and graph are defined,
-        if (pars.node && pars.graph) {
+        if (pars.node && this.$parent.graph) {
           //iterate over the node links and get the nodes
           for(let i = 0; i < pars.node.links.length; ++i)
           {
@@ -87,7 +89,7 @@ export default {
             //only interested in outbound links!
             if (l.fromId != pars.node.id) continue;
 
-            let toNode = pars.graph.getNode(l.toId)
+            let toNode = this.$parent.graph.getNode(l.toId)
             if ('mostSimilar' in l.data)
             {
               this.mostSimilarNode = toNode
@@ -113,24 +115,24 @@ export default {
       //pretend node was clicked which will get App.vue to trigger on that node
       //therefore this component will re-render but with showdetails = true...
       //hacky, but that's because we're not allowed to change showdetails as its a prop :s
-      bus.fire('node-clicked', this.pars.graph, this.pars.node);
+      bus.fire('emulate-node-clicked', this.pars.node);
     },
 
     goToOtherNode(node){
       if(node)
       {
-        bus.fire('node-clicked', this.pars.graph, node);
+        bus.fire('emulate-node-clicked', node);
       }
     },
     goToLeastSimilar(){
       if (this.leastSimilarNode){
-        bus.fire('node-clicked', this.pars.graph, this.leastSimilarNode);
+        bus.fire('emulate-node-clicked', this.leastSimilarNode);
       }
     },
 
     goToMostSimilar(){
       if (this.mostSimilarNode){
-        bus.fire('node-clicked', this.pars.graph, this.mostSimilarNode);
+        bus.fire('emulate-node-clicked', this.mostSimilarNode);
       }
     }
   },

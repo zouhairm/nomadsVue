@@ -29,7 +29,9 @@ export function getNeighborhood(graph, node)
 export function createScene(canvas) {
 // Since graph can be loaded dynamically, we have these uninitialized
 // and captured into closure. loadGraph will do the initialization
-let graph, renderer, layout, rendererSettings;
+let graph, renderer, layout, graphics, rendererSettings;
+
+let highlightedElements = {nodes: [], links: [], sticky: false}
 
 //Save where the graph will be rendered
 rendererSettings = {
@@ -40,6 +42,8 @@ rendererSettings = {
 //Use event handler to register for a load-graph
 //event if graph is changed
 bus.on('load-graph', loadGraph);
+bus.on('emulate-node-click', clickHandler)
+bus.on('emulate-node-hover', clickHandler)
 
 //First time creating scene, use getGraph() with default
 //parameters. getGraph will fire load-graph ...
@@ -52,7 +56,6 @@ return {
   resetView,
   toggleLayout,
 };
-
 
 
 function loadGraph(newGraph) {
@@ -85,7 +88,7 @@ function loadGraph(newGraph) {
 
   //We will use a webGL renderer
   //TODO: fallback to SVG if webGL not supported?
-  let graphics = Viva.Graph.View.webglGraphics();
+  graphics = Viva.Graph.View.webglGraphics();
   graphics.link(function (link) {
             return Viva.Graph.View.webglLine(getLineColor(link));
         })
@@ -106,7 +109,7 @@ function loadGraph(newGraph) {
   //*************** Events *******************
   //******************************************
 
-  let highlightedElements = {nodes: [], links: [], sticky: false}
+  
   var events = Viva.Graph.webglInputEvents(graphics, graph);
   events.mouseEnter(function (node) {
 
@@ -119,7 +122,7 @@ function loadGraph(newGraph) {
         if(highlightedElements.nodes.includes(node))
         {
           //when sticky, as if we clicked (so whole story will show)
-          bus.fire('node-clicked', graph, node)
+          bus.fire('node-clicked', node)
         }
         return
       }
@@ -129,7 +132,7 @@ function loadGraph(newGraph) {
       renderer.rerender()
 
       //Tell back to main app that we have a selected node.
-      bus.fire('node-hovered', graph, node)
+      bus.fire('node-hovered', node)
 
   // eslint-disable-next-line no-unused-vars
   }).mouseLeave(function (node) {
@@ -144,57 +147,8 @@ function loadGraph(newGraph) {
     renderer.rerender()
   })
   .click(function (node) {
-    clearHighlightedElements(highlightedElements)
-    highlightedElements = highlightNeighborhood(node)
-    highlightedElements.sticky = true
-    bus.fire('node-clicked', graph, node)
-
-    renderer.rerender()
+    clickHandler(node)
   })
-
-  function clearHighlightedElements(nhood)
-  {
-    nhood.nodes.forEach(n => highlightNode(n, false));
-    nhood.links.forEach(n => highlightLink(n, false));
-    rendererSettings.renderLinks = false;
-
-    nhood.nodes = []
-    nhood.links = []
-  }
-
-  function highlightNeighborhood(node)
-  {
-    var nhood = getNeighborhood(graph, node)
-
-    nhood.nodes.forEach(n => highlightNode(n, true))
-    nhood.links.forEach(l => highlightLink(l, true))
-    rendererSettings.renderLinks = nhood.links.length > 0
-
-    return nhood
-  }
-
-  function highlightLink(link, high) {
-    if(high){
-      // Equivalent to renderer.createLinkUi(link);
-      // but we don't have access to it
-      var linkPosition = layout.getLinkPosition(link.id);
-      graphics.addLink(link, linkPosition);
-    } else
-    {
-      // Equivalent to renderer.removeLinkUi(link);
-      // but we don't have access to it
-      graphics.releaseLink(link)
-    }
-  }
-
-  function highlightNode(node, high) {
-    var nodeUI = graphics.getNodeUI(node.id);
-    
-    //Change node color/size
-    nodeUI.color = getNodeColor(node, high);
-    nodeUI.size  = getNodeSize(node, high);
-  }
-
 
   //******************************************
   //*************** Renderer *****************
@@ -211,6 +165,63 @@ function loadGraph(newGraph) {
   }
 
 }
+
+
+
+function clickHandler(node)
+{
+  clearHighlightedElements(highlightedElements)
+  highlightedElements = highlightNeighborhood(node)
+  highlightedElements.sticky = true
+  bus.fire('node-clicked', node)
+
+  renderer.rerender()
+}
+
+function clearHighlightedElements(nhood)
+{
+  nhood.nodes.forEach(n => highlightNode(n, false));
+  nhood.links.forEach(n => highlightLink(n, false));
+  rendererSettings.renderLinks = false;
+
+  nhood.nodes = []
+  nhood.links = []
+}
+
+function highlightNeighborhood(node)
+{
+  var nhood = getNeighborhood(graph, node)
+
+  nhood.nodes.forEach(n => highlightNode(n, true))
+  nhood.links.forEach(l => highlightLink(l, true))
+  rendererSettings.renderLinks = nhood.links.length > 0
+
+  return nhood
+}
+
+function highlightLink(link, high) {
+  if(high){
+    // Equivalent to renderer.createLinkUi(link);
+    // but we don't have access to it
+    var linkPosition = layout.getLinkPosition(link.id);
+    graphics.addLink(link, linkPosition);
+  } else
+  {
+    // Equivalent to renderer.removeLinkUi(link);
+    // but we don't have access to it
+    graphics.releaseLink(link)
+  }
+}
+
+function highlightNode(node, high) {
+  var nodeUI = graphics.getNodeUI(node.id);
+  
+  //Change node color/size
+  nodeUI.color = getNodeColor(node, high);
+  nodeUI.size  = getNodeSize(node, high);
+}
+
+
 
 
 function panBackground(e){
