@@ -26,16 +26,18 @@ export function getNeighborhood(graph, node)
 }
 
 
-export function createScene(canvas) {
+export function createScene(canvas, _mapbox = null) {
 // Since graph can be loaded dynamically, we have these uninitialized
 // and captured into closure. loadGraph will do the initialization
-let graph, renderer, layout, graphics, rendererSettings;
+let graph, renderer, layout, graphics, rendererSettings, mapbox;
 
+mapbox = _mapbox;
 let highlightedElements = {nodes: [], links: [], sticky: false}
 
 //Save where the graph will be rendered
 rendererSettings = {
   container: canvas,
+  interactive: 'drag' // node and scroll are disabled!
   }
 
 
@@ -153,6 +155,22 @@ function loadGraph(newGraph) {
 
 
   canvas.ondblclick = resetAllNodes
+  canvas.onwheel = function (e) {
+      let mapboxz = mapbox.getZoom()
+
+      let glZ = null
+      if(e.deltaY < 0 && mapboxz < 10) {
+        // renderer.zoomIn()
+        let scaleFactor = Math.pow(1 + 0.4, 0.2);
+        renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
+      } 
+      else if (mapboxz > 1){
+        // renderer.zoomOut()
+        let scaleFactor = Math.pow(1 + 0.4, -0.2);
+        renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
+      }
+      renderer.rerender();
+  }
   //******************************************
   //*************** Renderer *****************
   //******************************************
@@ -160,11 +178,12 @@ function loadGraph(newGraph) {
   //Finally Ready to initialize and run the renderer!
   rendererSettings.renderLinks= false;  //by default we won't render links, 
   renderer = Viva.Graph.View.renderer(graph, rendererSettings);
-
+  window.renderer = renderer;
   if(renderer)
   {
     renderer.run();
     fitAndCenter();
+    renderer.rerender()
   }
 
 }
@@ -259,37 +278,30 @@ function highlightNode(node, high) {
 }
 
 
-
-
 function panBackground(e){
-
+    if(mapbox.disableZoomPan == false || mapbox.disableZoomPan == undefined)
+    {
       let zoom = e[0]
       let pan = {x: (e[12]+1)/2, y: -(e[13]+1)/2+1}
 
-      // console.log('zoom = ' + zoom + ' pan = ' + pan.x + ',' + pan.y)
+      //Mapbox uses a different convention for zoom...
+      mapbox.jumpTo({zoom: Math.log2(zoom)+1, center: [0,0]})
 
-      var x =  pan.x * 100 - 2200*zoom/3
-      var y =  pan.y * 100 - 3250*zoom/3
+      pan.x += (zoom - 1)/2
+      pan.y += (zoom - 1)/2
+      
+      let newCenter = [-pan.x*mapbox._container.clientWidth  + 0.5*mapbox._container.clientWidth,
+                       -pan.y*mapbox._container.clientHeight + 0.5*mapbox._container.clientHeight]
 
-      let cyDiv = rendererSettings.container
-      cyDiv.style.backgroundPosition = x +'vw ' + y + 'vh ';
-      cyDiv.style.backgroundSize = (1500 * zoom)+'vw auto'//+(window.screen.height * zoom)+'px'; 
-
+      newCenter = mapbox.unproject(newCenter)
+      mapbox.jumpTo({center: newCenter})
+    }
 }
 
 function fitAndCenter(){
-  // Final bit: most likely graph will take more space than available
-  // screen. Let's zoom out to fit it into the view:
-  var graphRect = layout.getGraphRect();  
-  renderer.moveTo((graphRect.x1 + graphRect.x2)/2,
-                  (graphRect.y1 + graphRect.y2)/2);
-
-  var graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
-  var screenSize = Math.min(rendererSettings.container.clientWidth, rendererSettings.container.clientHeight);
-  var desiredScale = screenSize / graphSize;
-
-  zoomTo(desiredScale, 1);
-
+  renderer.moveTo(mapbox._container.clientWidth/2,
+                  mapbox._container.clientHeight/2);
+  zoomTo(1, renderer.getTransform().scale)
 }
 
 //From https://github.com/anvaka/VivaGraphJS/issues/57
@@ -308,18 +320,24 @@ function zoomTo(desiredScale, currentScale) {
     //Recurse if we are not yet at the right scale!
     if(Math.abs(desiredScale - newScale) > Math.abs(currentScale - newScale)/2)
     {
+       mapbox.disableZoomPan = true
         setTimeout(function() {
             zoomTo(desiredScale, newScale);
         }, 16);
+    }
+    else
+    {
+      //we've arrived, re-nable mapbox event!
+      mapbox.disableZoomPan = false
     }
 }
 
 function getNodeSize(node, high)
 {
   if (high)
-    return 15;
+    return 3;
   else
-    return 12;
+    return 2;
 }
 function getNodeColorAlpha(node, high)
 {
@@ -404,6 +422,80 @@ function dispose() {
   // cancelAnimationFrame(rafHandle);
   bus.off('load-graph', loadGraph);
 }
+
+
+
+// //Get Scale to zoom mapping!
+
+// for(let z = 0; z < 10; z += 0.1)
+// {
+//     map.setZoom(z);
+
+//     const maxWidth =  100;
+//     const y = map._container.clientHeight / 2;
+//     const maxMeters = getDistance(map.unproject([0, y]), map.unproject([maxWidth, y]));
+//     // The real distance corresponding to 100px scale length is rounded off to
+//     // near pretty number and the scale length for the same is found out.
+//     // Default unit of the scale is based on User's locale.
+
+//     console.log(Math.round(z*100)/100 + ',' + Math.round(3909196.639848565/maxMeters*1000)/100)
+// }
+
+
+// function updateScale(map, container, options) {
+//     // A horizontal scale is imagined to be present at center of the map
+//     // container with maximum length (Default) as 100px.
+//     // Using spherical law of cosines approximation, the real distance is
+//     // found between the two coordinates.
+//     const maxWidth = options && options.maxWidth || 100;
+
+//     const y = map._container.clientHeight / 2;
+//     const maxMeters = getDistance(map.unproject([0, y]), map.unproject([maxWidth, y]));
+//     // The real distance corresponding to 100px scale length is rounded off to
+//     // near pretty number and the scale length for the same is found out.
+//     // Default unit of the scale is based on User's locale.
+
+//     console.log(map.getZoom(), 3909196.639848565/maxMeters, maxMeters)
+//     // if (options && options.unit === 'imperial') {
+//     //     const maxFeet = 3.2808 * maxMeters;
+//     //     if (maxFeet > 5280) {
+//     //         const maxMiles = maxFeet / 5280;
+//     //         setScale(container, maxWidth, maxMiles, 'mi');
+//     //     } else {
+//     //         setScale(container, maxWidth, maxFeet, 'ft');
+//     //     }
+//     // } else if (options && options.unit === 'nautical') {
+//     //     const maxNauticals = maxMeters / 1852;
+//     //     setScale(container, maxWidth, maxNauticals, 'nm');
+//     // } else {
+//     //     setScale(container, maxWidth, maxMeters, 'm');
+//     // }
+// }
+
+
+// function getDistance(latlng1, latlng2) {
+//     // Uses spherical law of cosines approximation.
+//     const R = 6371000;
+
+//     const rad = Math.PI / 180,
+//         lat1 = latlng1.lat * rad,
+//         lat2 = latlng2.lat * rad,
+//         a = Math.sin(lat1) * Math.sin(lat2) +
+//           Math.cos(lat1) * Math.cos(lat2) * Math.cos((latlng2.lng - latlng1.lng) * rad);
+
+//     const maxMeters = R * Math.acos(Math.min(a, 1));
+//     return maxMeters;
+
+// }
+
+
+
+
+
+
+
+
+
 
 
 } //end of Export

@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <div id="mapCanvas"></div>
     <div id="cnv"></div>
 <!-- 
     <div id="controls">
@@ -28,7 +29,7 @@
             <li><a target="_blank" href="https://www.worldnomads.com/create/scholarships/writing/2018/results">Travel Nomad Stories</a></li>
             <li><a target="_blank" href="https://radimrehurek.com/gensim/models/doc2vec.html">GenSim (Doc2Vec)</a></li>
             <li><a target="_blank" href="https://github.com/vuejs/awesome-vue">Vue.js</a></li>
-            <li><a target="_blank" href="https://github.com/anvaka/VivaGraphJS">VivaGraphJS (w/ WebGL renderer)</a></li>
+            <li><a target="_blank" href="https://github.com/anvaka/VivaGraphJS">VivaGraphJS (w/ WebGL renderer)</a><li><a target="_blank" href="https://www.mapbox.com/">Mapbox</a></li>
         </ul>
         <p>For technical details, check out this <a target="_blank" href="https://zouhairm.github.io/writerBlock">Blog Post</a></p>
         </div>
@@ -57,6 +58,9 @@ import bus from './lib/bus';
 import StoryView  from './components/StoryView.vue'
 import SearchView from './components/SearchView.vue'
 
+var mapboxgl = require('mapbox-gl');
+
+
 export default {
   name: 'app',
   data() {
@@ -65,6 +69,7 @@ export default {
       scene: null,
       showAbout: true,
       graph: null,
+      mapbox: null,
       storyViewPars: { node: null, graph: null, showdetails: false},
     };
   },
@@ -103,8 +108,23 @@ export default {
   },
   mounted() {
 
+    //Token restricted to zouhairm.github.io/nomadsVue - please don't steal :p
+    mapboxgl.accessToken = 'pk.eyJ1Ijoiem9vaGFpciIsImEiOiJjanlmMWRzenExN2N4M2xzOGVvdDg2eG9jIn0.HX4LVDqBgxUKivoqPLk_4w'
+
+    this.mapbox = new mapboxgl.Map({
+      container: 'mapCanvas',
+      style: 'mapbox://styles/mapbox/dark-v9',
+      center: [0, 0],
+      zoom: 1,
+      minZoom: 1,
+      maxZoom: 10,
+    });
+    this.mapbox.scrollZoom.disable()
+    window.mapbox = this.mapbox
+
+
     const canvas = document.getElementById('cnv');
-    this.scene = createScene(canvas);
+    this.scene = createScene(canvas, this.mapbox);
 
     //needed to provide closure in the
     //callbacks below -- yay JS !
@@ -128,6 +148,7 @@ export default {
       self.showAbout = false
 
     }
+
 
   },
   beforeDestroy() {
@@ -164,6 +185,16 @@ body {
   height: 100%;
 }
 
+#mapCanvas {
+  z-index:0;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
 #cnv {
   z-index: 0;
   width: 100vw;
@@ -174,10 +205,10 @@ body {
   bottom: 0;
   background-color: gray;
 
-  background: #000000d9 url('assets/world-map-equirectangular.png') no-repeat;
+/*  background: #000000d9 url('assets/world-map-equirectangular.png') no-repeat;
   background-attachment: fixed;
   background-position: 0px 0px;
-  background-size: 1460px 912px;
+  background-size: 1460px 912px;*/
 }
 canvas{ position: relative; z-index: 1 }
 
@@ -217,12 +248,16 @@ a {
 
 .about-box {
   position: absolute;
-  left: 30%;
-  padding: 14px;
-  top: 64px;
-  width: 40%;
+  overflow: scroll;
+  max-height: 80vh;
+  max-width: 75vw;
+
+  margin: auto;
+  left: 0; right: 0; top: 64px;
+
+  padding: 10px;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 5%;
+  border-radius: 1%;
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
   z-index: 1;
 
