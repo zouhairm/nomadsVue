@@ -7,7 +7,8 @@
     "serveD": "vue-cli-service serve --mode production",
     "start": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "post-install": "patch-package"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.9.0",
@@ -24,6 +25,7 @@
     "ngraph.generators": "0.0.19",
     "ngraph.graph": "0.0.15",
     "ngraph.traverse": "0.0.1",
+    "patch-package": "^6.1.2",
     "vivagraphjs": "^0.10.1",
     "vue": "^2.5.22",
     "w-gl": "^0.3.1"

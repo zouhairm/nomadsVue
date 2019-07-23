@@ -12,8 +12,6 @@ import Viva from 'vivagraphjs';
 var traverseNodes = require('ngraph.traverse').nodes;
 var traverseLinks = require('ngraph.traverse').links;
 
-
-
 export function getNeighborhood(graph, node)
 //This will include node, its outgoing elements, and its neighbors
 {
@@ -60,6 +58,8 @@ return {
 };
 
 
+
+
 function loadGraph(newGraph) {
   //If there is already a renderer
   //finalize it and clear up
@@ -90,6 +90,8 @@ function loadGraph(newGraph) {
 
   //We will use a webGL renderer
   //TODO: fallback to SVG if webGL not supported?
+  //Or at least show an error message ...
+
   graphics = Viva.Graph.View.webglGraphics();
   graphics.link(function (link) {
             return Viva.Graph.View.webglLine(getLineColor(link));
@@ -154,22 +156,24 @@ function loadGraph(newGraph) {
   })
 
 
+  canvas.ondrag
   canvas.ondblclick = resetAllNodes
   canvas.onwheel = function (e) {
       let mapboxz = mapbox.getZoom()
 
-      let glZ = null
       if(e.deltaY < 0 && mapboxz < 10) {
         // renderer.zoomIn()
-        let scaleFactor = Math.pow(1 + 0.4, 0.2);
+        let scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
         renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
       } 
       else if (mapboxz > 1){
         // renderer.zoomOut()
-        let scaleFactor = Math.pow(1 + 0.4, -0.2);
+        let scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
         renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
       }
-      renderer.rerender();
+      renderer.rerender()
+      setTimeout(function() {renderer.rerender()}, 200);
+      
   }
   //******************************************
   //*************** Renderer *****************
@@ -183,7 +187,8 @@ function loadGraph(newGraph) {
   {
     renderer.run();
     fitAndCenter();
-    renderer.rerender()
+    setTimeout(function() {renderer.rerender()}, 200);
+    // renderer.rerender()
   }
 
 }
@@ -335,7 +340,7 @@ function zoomTo(desiredScale, currentScale) {
 function getNodeSize(node, high)
 {
   if (high)
-    return 3;
+    return 2;
   else
     return 2;
 }
@@ -405,97 +410,21 @@ function resetView() {
   }
 }
 
-// function initScene() {
-//   let scene = makeWGLScene(canvas);
-//   scene.setClearColor(12/255, 41/255, 82/255, 1)
-//   let initialSceneSize = 100;
-//   scene.setViewBox({
-//     left:  -initialSceneSize,
-//     top:   -initialSceneSize,
-//     right:  initialSceneSize,
-//     bottom: initialSceneSize,
-//   });
-//   return scene;
-// }
 
 function dispose() {
   // cancelAnimationFrame(rafHandle);
   bus.off('load-graph', loadGraph);
 }
 
+// // https://github.com/anvaka/VivaGraphJS/issues/69
+// var preciseCheck = function (nodeUI, x, y) { 
+//   if (nodeUI && nodeUI.size) { 
+//   var pos = nodeUI.position, half = nodeUI.size / 2; 
+//   return (((pos.x - x) * (pos.x - x) + (pos.y - y) * (pos.y - y)) < (half*half)); 
+// /* return pos.x - half < x && x < pos.x + half && pos.y - half < y && y < pos.y + half;*/ 
+// } 
 
-
-// //Get Scale to zoom mapping!
-
-// for(let z = 0; z < 10; z += 0.1)
-// {
-//     map.setZoom(z);
-
-//     const maxWidth =  100;
-//     const y = map._container.clientHeight / 2;
-//     const maxMeters = getDistance(map.unproject([0, y]), map.unproject([maxWidth, y]));
-//     // The real distance corresponding to 100px scale length is rounded off to
-//     // near pretty number and the scale length for the same is found out.
-//     // Default unit of the scale is based on User's locale.
-
-//     console.log(Math.round(z*100)/100 + ',' + Math.round(3909196.639848565/maxMeters*1000)/100)
-// }
-
-
-// function updateScale(map, container, options) {
-//     // A horizontal scale is imagined to be present at center of the map
-//     // container with maximum length (Default) as 100px.
-//     // Using spherical law of cosines approximation, the real distance is
-//     // found between the two coordinates.
-//     const maxWidth = options && options.maxWidth || 100;
-
-//     const y = map._container.clientHeight / 2;
-//     const maxMeters = getDistance(map.unproject([0, y]), map.unproject([maxWidth, y]));
-//     // The real distance corresponding to 100px scale length is rounded off to
-//     // near pretty number and the scale length for the same is found out.
-//     // Default unit of the scale is based on User's locale.
-
-//     console.log(map.getZoom(), 3909196.639848565/maxMeters, maxMeters)
-//     // if (options && options.unit === 'imperial') {
-//     //     const maxFeet = 3.2808 * maxMeters;
-//     //     if (maxFeet > 5280) {
-//     //         const maxMiles = maxFeet / 5280;
-//     //         setScale(container, maxWidth, maxMiles, 'mi');
-//     //     } else {
-//     //         setScale(container, maxWidth, maxFeet, 'ft');
-//     //     }
-//     // } else if (options && options.unit === 'nautical') {
-//     //     const maxNauticals = maxMeters / 1852;
-//     //     setScale(container, maxWidth, maxNauticals, 'nm');
-//     // } else {
-//     //     setScale(container, maxWidth, maxMeters, 'm');
-//     // }
-// }
-
-
-// function getDistance(latlng1, latlng2) {
-//     // Uses spherical law of cosines approximation.
-//     const R = 6371000;
-
-//     const rad = Math.PI / 180,
-//         lat1 = latlng1.lat * rad,
-//         lat2 = latlng2.lat * rad,
-//         a = Math.sin(lat1) * Math.sin(lat2) +
-//           Math.cos(lat1) * Math.cos(lat2) * Math.cos((latlng2.lng - latlng1.lng) * rad);
-
-//     const maxMeters = R * Math.acos(Math.min(a, 1));
-//     return maxMeters;
-
-// }
-
-
-
-
-
-
-
-
-
+// return true; }
 
 
 } //end of Export

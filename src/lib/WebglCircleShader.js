@@ -37,7 +37,7 @@ export function CircleNodeShader(transformCallBack = null) {
         'varying vec4 color;',
         'void main(void) {',
         '   gl_Position = u_transform * vec4(a_vertexPos/u_screenSize, 0, 1);',
-        '   gl_PointSize = a_customAttributes[1] * sqrt(u_transform[0][0]);',
+        '   gl_PointSize = a_customAttributes[1] * sqrt(u_transform[0][0]);', //sqrt to avoid nodes getting too big as we zoom in
         '   float c = a_customAttributes[0];',
         '   color.b = mod(c, 256.0); c = floor(c/256.0);',
         '   color.g = mod(c, 256.0); c = floor(c/256.0);',

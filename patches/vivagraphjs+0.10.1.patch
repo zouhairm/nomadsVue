@@ -1,0 +1,20 @@
+diff --git a/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js b/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js
+index a4654f1..0a516ba 100644
+--- a/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js
++++ b/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js
+@@ -104,10 +104,12 @@ function webglInputEvents(webglGraphics) {
+   function preciseCheck(nodeUI, x, y) {
+     if (nodeUI && nodeUI.size) {
+       var pos = nodeUI.position,
+-        half = nodeUI.size;
++        half = nodeUI.size/2;
+ 
+-      return pos.x - half < x && x < pos.x + half &&
+-        pos.y - half < y && y < pos.y + half;
++     let dx = (pos.x - x),
++         dy =  (pos.y - y)
++         
++     return (( dx * dx + dy*dy) < (half*half));
+     }
+ 
+     return true;
