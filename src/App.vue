@@ -73,7 +73,7 @@ export default {
     
     return {
       scene: null,
-      showAbout: false,
+      showAbout: true,
       showFilter: false,
       graph: null,
       year: '2019',
