@@ -201,6 +201,8 @@ function resetAllNodes()
 
   graph.forEachNode(n => highlightNode(n, false))
 
+  bus.fire('node-hovered', null)
+
   fitAndCenter();
   renderer.rerender()
 

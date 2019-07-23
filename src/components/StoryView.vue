@@ -199,8 +199,8 @@ function getStoryFullText(node_id, year = '2018')
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
 
-  max-height: 96vh;
-  overflow-y: auto;
+  max-height: 88vh;
+  overflow-y: scroll;
   border-radius: 2%;
   z-index: 1;
 
@@ -248,7 +248,7 @@ function getStoryFullText(node_id, year = '2018')
   margin: 20px 0px;
   white-space: pre-line;
 
-  max-height: 25vw;
+  max-height: 40vw;
   overflow-y: scroll;
 
   background: rgba(150, 150, 150, 0.4);
