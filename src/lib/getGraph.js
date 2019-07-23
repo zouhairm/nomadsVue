@@ -10,11 +10,13 @@ import bus from './bus';
 import {LngLat} from 'mapbox-gl'
 
 /* MUSTDO: make the file smaller ... */
-export function getGraph(jsonGraphFileURL = './2018Stories_viva.json') {
-  return axios.get(jsonGraphFileURL).then( 
+export function getGraph(year = '2019' ) {
+  let jsonGraphFileURL = `./Stories_viva_${year}.json`
+  return axios.get(jsonGraphFileURL,
+    ).then( 
     response => {
       let g = tryJson(response.data);
-      bus.fire('load-graph', g)
+      bus.fire('load-graph', g, year);
   });
   //TODO: add catch handling of error ...
 }

@@ -21,6 +21,7 @@ import gensim
 
 import geocoder
 geoNamesKey = '' #Needs to be given
+assert(geoNamesKey != '')
 
 
 global countryLocCache
@@ -38,14 +39,36 @@ if os.path.isfile(NominatimCacheFile):
 
 countryLocCache['aliases'] = {
     'Palestine': 'Palestinian Territory',
+
+    'Great Britain': 'United Kingdom',
+    'United Kingdom (Great Britain': 'United Kingdom',
+    'Great Britain': 'United Kingdom',
+
+    'Virgin Islands (Brit)': 'British Virgin Islands',
+    'Virgin Islands (USA': 'US Virgin Islands',
+    'Virgin Islands (usa)': 'US Virgin Islands',
+
+    'Turks and Caicos Is': 'Turks and Caicos',
+    'Turks & Caicos Is' : 'Turks and Caicos',
+    'Antigua & Barbuda': 'Antigua and  Barbuda',
+    'Sao Tome & Principe': 'Sao Tome and Principe',
+    'St Vincent & Grenadines': 'St Vincent and Grenadines',
     'Congo Democratic Rep': 'Congo Democratic Republic',
-    'Bosnia & Herzegovina': 'Bosnia',
+    'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
+    'Serbia & Montenegro': 'Serbia and Montenegro',
+    'Trinidad & Tobago': 'Trinidad and Tobago',
+    
+    'Netherland Antilles': 'Caribbean Netherlands',
+
     'Usa': 'United States of America',
 }
+def geoAlias(countryName):
+    global countryLocCache
+    return countryLocCache['aliases'].get(countryName,countryName)
+
 def geoLocate(countryName):
     global countryLocCache
 
-    countryName = countryLocCache['aliases'].get(countryName,countryName)
 
     if not countryName in countryLocCache:
         try:
@@ -64,8 +87,11 @@ def geoLocate(countryName):
     return countryLocCache[countryName] 
 
 def storyToElement(fileid, filepath):
+
     with open(filepath) as f:
         s = yaml.load(f)
+        s['AuthorCountry'] = geoAlias(s['AuthorCountry'])
+        s['SetInCountry'] = geoAlias(s['SetInCountry'])
 
 
     authorCountryProps = geoLocate(s['AuthorCountry'])
@@ -110,7 +136,7 @@ def extractNodes(dataFolder):
     return nodes
 
 
-def extractEdges(doc2VecModel, nodes, topn = 5):
+def extractEdges(doc2VecModel, nodes, topn = 4):
     edges = []
 
     if not withEdges:
@@ -259,8 +285,12 @@ def vivafy(cytoDict):
 
 if __name__ == '__main__':
     print('Running ... ')
-
-    buildCytoJSON('./dataFolder/2018', './story2Vec/gensimModel.m', './2018Stories_cyto%s.json'%('_debug' if debug else ''))
+    
+    for year in [2018, 2019]:
+        print('Running for year %i'%year)
+        buildCytoJSON('../dataFolder/%i'%year, 
+                      '../dataFolder/gensimModel_%i.m'%year, 
+                      '../public/Stories_cyto%s_%i.json'%('_debug' if debug else '', year))
 
     with open(NominatimCacheFile,'w+') as f:
         yaml.dump(countryLocCache, f)

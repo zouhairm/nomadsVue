@@ -36,11 +36,16 @@
         <a href='#' @click.prevent='showAbout = false'  class='close-about' title='Close this message'>Close</a>
     </div>
 
+    <filter-view id='filter' :show='showFilter'> </filter-view>
+
     <div class='footer'>
         <a @click.prevent='showAbout = !showAbout' class='about-link'>About</a>
         <p class='copyText'>
             Made during late night hours by <a target="_blank" href="https://zouhairm.github.io/bio">Zouhair M</a>
         </p>
+
+        <a @click.prevent='showFilter = !showFilter' class='filter-link'>Filter</a>
+
     </div>
 
 
@@ -57,6 +62,7 @@ import bus from './lib/bus';
 
 import StoryView  from './components/StoryView.vue'
 import SearchView from './components/SearchView.vue'
+import FilterView from './components/FilterView.vue'
 
 var mapboxgl = require('mapbox-gl');
 
@@ -67,8 +73,10 @@ export default {
     
     return {
       scene: null,
-      showAbout: true,
+      showAbout: false,
+      showFilter: false,
       graph: null,
+      year: '2019',
       mapbox: null,
       storyViewPars: { node: null, graph: null, showdetails: false},
     };
@@ -101,10 +109,11 @@ export default {
   {
     SearchView,
     StoryView,
+    FilterView,
   },
 
   created(){
-    bus.on('load-graph', g => {this.graph = g;});
+    bus.on('load-graph', (g, year) => {this.graph = g; this.year = year});
   },
   mounted() {
 
@@ -203,12 +212,12 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: gray;
+  background-color: #000000d9;
 
 /*  background: #000000d9 url('assets/world-map-equirectangular.png') no-repeat;
   background-attachment: fixed;
   background-position: 0px 0px;
-  background-size: 1460px 912px;*/
+  /*background-width: 100vw;*/
 }
 canvas{ position: relative; z-index: 1 }
 
@@ -266,6 +275,16 @@ a {
   background: rgba(0, 120, 120, 0.4);
   padding: 5px 10px;
   margin-right: 5px;
+  border-radius: 5%;
+  cursor: pointer;
+  z-index: 1;
+}
+.filter-link {
+  background: rgba(0, 120, 120, 0.4);
+  padding: 5px 10px;
+  margin-right: 5px;
+  position: absolute;
+  right: 20px;
   border-radius: 5%;
   cursor: pointer;
   z-index: 1;

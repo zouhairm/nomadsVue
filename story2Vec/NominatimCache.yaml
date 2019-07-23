@@ -18,11 +18,21 @@ American Samoa:
   lonlat:
   - -169.47767
   - -14.23377
+Andorra:
+  cont: EU
+  lonlat:
+  - 1.58333
+  - 42.55
 Angola:
   cont: AF
   lonlat:
   - 18.5
   - -12.5
+Antigua and  Barbuda:
+  cont: NA
+  lonlat:
+  - -61.8
+  - 17.05
 Argentina:
   cont: SA
   lonlat:
@@ -118,6 +128,11 @@ Bosnia:
   lonlat:
   - 17.83333
   - 44.25
+Bosnia and Herzegovina:
+  cont: EU
+  lonlat:
+  - 17.83333
+  - 44.25
 Botswana:
   cont: AF
   lonlat:
@@ -128,6 +143,16 @@ Brazil:
   lonlat:
   - -55.0
   - -10.0
+British Virgin Islands:
+  cont: NA
+  lonlat:
+  - -64.5
+  - 18.5
+Brunei:
+  cont: AS
+  lonlat:
+  - 114.66667
+  - 4.5
 Bulgaria:
   cont: EU
   lonlat:
@@ -138,6 +163,11 @@ Burkina Faso:
   lonlat:
   - -1.66667
   - 12.5
+Burundi:
+  cont: AF
+  lonlat:
+  - 30.0
+  - -3.5
 Cambodia:
   cont: AS
   lonlat:
@@ -163,6 +193,16 @@ Cape Verde:
   lonlat:
   - -24.0
   - 16.0
+Caribbean Netherlands:
+  cont: NA
+  lonlat:
+  - -68.29445
+  - 12.21286
+Cayman Islands:
+  cont: NA
+  lonlat:
+  - -80.66667
+  - 19.5
 Central African Republic:
   cont: AF
   lonlat:
@@ -173,6 +213,11 @@ Chad:
   lonlat:
   - 19.0
   - 15.0
+Channel Islands:
+  cont: SA
+  lonlat:
+  - -61.19455
+  - -51.80572
 Chile:
   cont: SA
   lonlat:
@@ -283,6 +328,16 @@ Ethiopia:
   lonlat:
   - 39.5
   - 9.0
+Falkland Islands:
+  cont: SA
+  lonlat:
+  - -59.16667
+  - -51.75
+Faroe Islands:
+  cont: EU
+  lonlat:
+  - -7.0
+  - 62.0
 Fiji:
   cont: OC
   lonlat:
@@ -328,11 +383,11 @@ Ghana:
   lonlat:
   - -1.2
   - 8.1
-Great Britain:
+Gibraltar:
   cont: EU
   lonlat:
-  - -2.69531
-  - 54.75844
+  - -5.35257
+  - 36.14474
 Greece:
   cont: EU
   lonlat:
@@ -343,6 +398,21 @@ Greenland:
   lonlat:
   - -40.0
   - 72.0
+Grenada:
+  cont: NA
+  lonlat:
+  - -61.66667
+  - 12.11667
+Guadeloupe:
+  cont: NA
+  lonlat:
+  - -61.58333
+  - 16.25
+Guam:
+  cont: OC
+  lonlat:
+  - 144.81834
+  - 13.47861
 Guatemala:
   cont: NA
   lonlat:
@@ -413,6 +483,11 @@ Ireland:
   lonlat:
   - -8.0
   - 53.0
+Isle Of Man:
+  cont: EU
+  lonlat:
+  - -4.5
+  - 54.25
 Israel:
   cont: AS
   lonlat:
@@ -433,6 +508,11 @@ Japan:
   lonlat:
   - 139.75309
   - 35.68536
+Jersey:
+  cont: EU
+  lonlat:
+  - -2.11667
+  - 49.21667
 Jordan:
   cont: AS
   lonlat:
@@ -493,6 +573,11 @@ Lesotho:
   lonlat:
   - 28.25
   - -29.5
+Liberia:
+  cont: AF
+  lonlat:
+  - -9.5
+  - 6.5
 Libya:
   cont: AF
   lonlat:
@@ -513,6 +598,11 @@ Luxembourg:
   lonlat:
   - 6.16667
   - 49.75
+Macau:
+  cont: AS
+  lonlat:
+  - 113.54611
+  - 22.20056
 Macedonia:
   cont: EU
   lonlat:
@@ -608,6 +698,11 @@ Namibia:
   lonlat:
   - 17.0
   - -22.0
+Nauru:
+  cont: OC
+  lonlat:
+  - 166.933
+  - -0.517
 Nepal:
   cont: AS
   lonlat:
@@ -703,6 +798,11 @@ Philippines:
   lonlat:
   - 122.0
   - 13.0
+Pitcairn Island:
+  cont: OC
+  lonlat:
+  - -130.10834
+  - -25.07075
 Poland:
   cont: EU
   lonlat:
@@ -748,11 +848,16 @@ Samoa:
   lonlat:
   - -172.13333
   - -13.8
-Sao Tome & Principe:
-  cont: UN
+Samoa American:
+  cont: OC
   lonlat:
-  - 0
-  - 0
+  - -169.47767
+  - -14.23377
+Sao Tome and Principe:
+  cont: AF
+  lonlat:
+  - 7.0
+  - 1.0
 Saudi Arabia:
   cont: AS
   lonlat:
@@ -768,11 +873,21 @@ Serbia:
   lonlat:
   - 20.45998
   - 44.81892
+Serbia and Montenegro:
+  cont: EU
+  lonlat:
+  - 20.46341
+  - 44.8174
 Seychelles:
   cont: AF
   lonlat:
   - 55.66667
   - -4.58333
+Sierra Leone:
+  cont: AF
+  lonlat:
+  - -11.5
+  - 8.5
 Singapore:
   cont: AS
   lonlat:
@@ -803,6 +918,11 @@ South Africa:
   lonlat:
   - 24.0
   - -29.0
+South Sudan:
+  cont: AF
+  lonlat:
+  - 30.0
+  - 7.5
 Spain:
   cont: EU
   lonlat:
@@ -813,21 +933,41 @@ Sri Lanka:
   lonlat:
   - 80.75
   - 7.75
+St Eustatius:
+  cont: NA
+  lonlat:
+  - -68.29445
+  - 12.21286
+St Kitts-Nevis:
+  cont: NA
+  lonlat:
+  - -62.75
+  - 17.33333
 St Lucia:
   cont: NA
   lonlat:
   - -60.96667
   - 13.88333
-St Vincent & Grenadines:
-  cont: UN
+St Maarten:
+  cont: NA
   lonlat:
-  - 0
-  - 0
+  - -63.1089
+  - 18.04095
+St Vincent and Grenadines:
+  cont: NA
+  lonlat:
+  - -61.2
+  - 13.08333
 Sudan:
   cont: AF
   lonlat:
   - 30.0
   - 16.0
+Swaziland:
+  cont: AF
+  lonlat:
+  - 31.5
+  - -26.5
 Sweden:
   cont: EU
   lonlat:
@@ -843,6 +983,11 @@ Syria:
   lonlat:
   - 38.0
   - 35.0
+Tahiti:
+  cont: OC
+  lonlat:
+  - -149.42951
+  - -17.6486
 Taiwan:
   cont: AS
   lonlat:
@@ -873,11 +1018,11 @@ Tonga:
   lonlat:
   - -175.0
   - -20.0
-Trinidad & Tobago:
-  cont: UN
+Trinidad and Tobago:
+  cont: NA
   lonlat:
-  - 0
-  - 0
+  - -61.0
+  - 11.0
 Tunisia:
   cont: AF
   lonlat:
@@ -893,11 +1038,16 @@ Turkmenistan:
   lonlat:
   - 59.66667
   - 39.75
-Turks & Caicos Is:
-  cont: UN
+Turks and Caicos:
+  cont: NA
   lonlat:
-  - 0
-  - 0
+  - -71.58333
+  - 21.73333
+US Virgin Islands:
+  cont: NA
+  lonlat:
+  - -64.98348
+  - 18.34829
 Uganda:
   cont: AF
   lonlat:
@@ -953,11 +1103,6 @@ Vietnam:
   lonlat:
   - 107.83333
   - 16.16667
-Virgin Islands (Brit):
-  cont: UN
-  lonlat:
-  - 0
-  - 0
 Virgin Islands (Usa):
   cont: NA
   lonlat:
@@ -979,7 +1124,20 @@ Zimbabwe:
   - 29.75
   - -19.0
 aliases:
-  Bosnia & Herzegovina: Bosnia
+  Antigua & Barbuda: Antigua and  Barbuda
+  Bosnia & Herzegovina: Bosnia and Herzegovina
   Congo Democratic Rep: Congo Democratic Republic
+  Great Britain: United Kingdom
+  Netherland Antilles: Caribbean Netherlands
   Palestine: Palestinian Territory
+  Sao Tome & Principe: Sao Tome and Principe
+  Serbia & Montenegro: Serbia and Montenegro
+  St Vincent & Grenadines: St Vincent and Grenadines
+  Trinidad & Tobago: Trinidad and Tobago
+  Turks & Caicos Is: Turks and Caicos
+  Turks and Caicos Is: Turks and Caicos
+  United Kingdom (Great Britain: United Kingdom
   Usa: United States of America
+  Virgin Islands (Brit): British Virgin Islands
+  Virgin Islands (USA: US Virgin Islands
+  Virgin Islands (usa): US Virgin Islands

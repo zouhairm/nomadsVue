@@ -68,7 +68,8 @@ export default {
           if (pars.showdetails){
             // TODO: actually fetch the story details and show them
             this.storyText += ' (... Fetching more of the story ...)'
-            getStoryFullText(this.pars.node.id).then(txt => this.storyText = txt)
+            getStoryFullText(this.pars.node.id, this.$parent.year)
+              .then(txt => this.storyText = txt)
           }
         }
 
@@ -176,7 +177,8 @@ function getStoryFullText(node_id, year = '2018')
   storageURL += encodeURIComponent(node_id)
 
   return axios.get(storageURL).then( 
-      response => { return jsyaml.load(response.data)['Text'];});
+      response => { return jsyaml.load(response.data)['Text'];})
+    .catch( e => {return e});
 }
 
 

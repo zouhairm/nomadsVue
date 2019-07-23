@@ -64,6 +64,7 @@ function loadGraph(newGraph) {
   //If there is already a renderer
   //finalize it and clear up
   if (renderer) {
+    resetAllNodes();
     renderer.dispose();
     renderer = null
   }
