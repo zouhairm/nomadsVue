@@ -157,13 +157,10 @@ function loadGraph(newGraph) {
   })
 
 
-  canvas.ondrag
   canvas.ondblclick = resetAllNodes
   canvas.onwheel = function (e) {
       let mapboxz = mapbox.getZoom()
       let webglz = renderer.getTransform().scale
-
-      console.log(mapboxz,webglz,e.deltaY)
 
       let scaleFactor = 1;
       if(e.deltaY < 0 && mapboxz < 10) { // renderer.zoomIn()
@@ -195,8 +192,6 @@ function loadGraph(newGraph) {
   {
     renderer.run();
     fitAndCenter();
-    setTimeout(function() {renderer.rerender()}, 200);
-    // renderer.rerender()
   }
 
 }
@@ -212,8 +207,6 @@ function resetAllNodes()
   bus.fire('node-hovered', null)
 
   fitAndCenter();
-  renderer.rerender()
-
 }
 
 function hoverHandler(node)
@@ -296,27 +289,42 @@ function highlightNode(node, high) {
 function panBackground(e){
     if(mapbox.disableZoomPan == false || mapbox.disableZoomPan == undefined)
     {
+      //First, let's match the zoom. 
+      //Note that Mapbox uses a different convention for zoom...
       let zoom = e[0]
-      let pan = {x: (e[12]+1)/2, y: -(e[13]+1)/2+1}
-
-      //Mapbox uses a different convention for zoom...
       mapbox.jumpTo({zoom: Math.log2(zoom)+1, center: [0,0]})
 
+      //Next, let's match the pan - we use mapbox's unproject to make
+      //sure that the graph center matches.
+      let pan = {x: (e[12]+1)/2, y: -(e[13]+1)/2+1}
       pan.x += (zoom - 1)/2
       pan.y += (zoom - 1)/2
       
-      let newCenter = [-pan.x*mapbox._container.clientWidth  + 0.5*mapbox._container.clientWidth,
-                       -pan.y*mapbox._container.clientHeight + 0.5*mapbox._container.clientHeight]
+      let newCenter_xy = {x: -pan.x*mapbox._container.clientWidth  + 0.5*mapbox._container.clientWidth,
+                          y: -pan.y*mapbox._container.clientHeight + 0.5*mapbox._container.clientHeight}
 
-      newCenter = mapbox.unproject(newCenter)
-      mapbox.jumpTo({center: newCenter})
+      let newCenter_latlon = mapbox.unproject(newCenter_xy)
+      mapbox.jumpTo({center: newCenter_latlon})
+
+
+      //In case we've panned to the edge of the screen, we should clip
+      //the renderer!
+      let actualCenter_xy = mapbox.project(newCenter_latlon)
+
+      //We're off by 10 pixels - tell renderer to move back!
+      if(Math.abs(actualCenter_xy.y - mapbox._container.clientHeight/2) > 5)
+      {
+        renderer.moveTo(newCenter_xy.x, newCenter_xy.y - (newCenter_latlon.lat < 0 ? 5: -5))
+      }
     }
 }
 
 function fitAndCenter(){
   renderer.moveTo(mapbox._container.clientWidth/2,
                   mapbox._container.clientHeight/2);
-  zoomTo(1, renderer.getTransform().scale)
+  zoomTo(1, renderer.getTransform().scale);
+
+  setTimeout(function() {renderer.rerender()}, 200);
 }
 
 //From https://github.com/anvaka/VivaGraphJS/issues/57
@@ -410,7 +418,6 @@ function resetView() {
   {
     renderer.reset();
     fitAndCenter();
-    renderer.rerender();
   }
 }
 
