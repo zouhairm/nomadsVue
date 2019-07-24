@@ -24,9 +24,30 @@
     <div class="ac-related" v-if='pars.showdetails'>
       Related Stories: 
       <ul style="margin-top: 3px">
-        <li><div class="ac-most" @click.prevent='goToMostSimilar'>{{mostSimilarTitle}}</div> (Most Similar)</li>
-        <li v-for="n in otherRelatedNodes" :key="n.id"><div class="ac-other" @click.prevent='goToOtherNode(n)'>{{n.data.label}}</div></li>
-        <li><div class="ac-least" @click.prevent='goToLeastSimilar'>{{leastSimilarTitle}}</div> (Least Similar)</li>
+        <li>
+          <div class="ac-most" @click.prevent='goToNode(mostSimilarOutNode)'>{{nodeTitle(mostSimilarOutNode)}}</div>
+          <small>
+            <em v-if="mostSimilarInNode == mostSimilarOutNode"> (Most Similar - bidirectional)</em>
+            <em v-else-if="mostSimilarInNode == null">(Most Similar - outbound)</em>
+            <em v-else> (Most Similar - outbound)</em>
+          </small>
+        </li>
+
+        <li v-if="mostSimilarInNode != null && mostSimilarInNode != mostSimilarOutNode">
+          <div class="ac-most" @click.prevent='goToNode(mostSimilarInNode)'>{{nodeTitle(mostSimilarInNode)}}</div>
+          <small><em> (MostSimilar - inbound)</em></small>
+        </li>
+
+        <li v-for="n in otherRelatedNodes" :key="n.id">
+          <div class="ac-other" @click.prevent='goToNode(n)'>{{nodeTitle(n)}}</div>
+          <!-- <small><em> (Similar)</em></small> -->
+        </li>
+
+        <li>
+          <div class="ac-least" @click.prevent='goToNode(leastSimilarOutNode)'>{{nodeTitle(leastSimilarOutNode)}}</div>
+          <small><em> (Least Similar)</em></small>
+        </li>
+
       </ul>
     </div>
     <div class="ac-more" @click.prevent='readMore' v-else > Continue Reading ... </div>
@@ -46,8 +67,9 @@ export default {
 	props: ['pars'],
 	data() {
 		return {
-      mostSimilarNode: null,
-      leastSimilarNode: null,
+      mostSimilarOutNode: null,
+      mostSimilarInNode: null,
+      leastSimilarOutNode: null,
       otherRelatedNodes: [],
       graph: null,
       storyText: '',
@@ -76,8 +98,9 @@ export default {
         //we are going to extract the most/least similar nodes
 
         //start by assuming they are null
-        this.mostSimilarNode  = null
-        this.leastSimilarNode = null
+        this.mostSimilarInNode  = null
+        this.mostSimilarOutNode   = null
+        this.leastSimilarOutNode  = null
         this.otherRelatedNodes = []
 
         //if new node and graph are defined,
@@ -87,21 +110,28 @@ export default {
           {
             let l = pars.node.links[i]
 
-            //only interested in outbound links!
-            if (l.fromId != pars.node.id) continue;
-
-            let toNode = this.$parent.graph.getNode(l.toId)
-            if ('mostSimilar' in l.data)
+            //If this is an inbound link
+            if (l.fromId != pars.node.id)
             {
-              this.mostSimilarNode = toNode
+              //only save it if this is the most similar InNode
+              if ('mostSimilar' in l.data)
+              {
+                this.mostSimilarInNode = this.$parent.graph.getNode(l.fromId)
+              }
+            }
+            //otherwise, this is an outbound link,
+            //save all of them
+            else if ('mostSimilar' in l.data)
+            {
+              this.mostSimilarOutNode = this.$parent.graph.getNode(l.toId)
             }
             else if ('leastSimilar' in l.data)
             {
-              this.leastSimilarNode = toNode
+              this.leastSimilarOutNode = this.$parent.graph.getNode(l.toId)
             }
             else
             {
-              this.otherRelatedNodes.push(toNode)
+              this.otherRelatedNodes.push(this.$parent.graph.getNode(l.toId))
             }
           }//endfor
         }//endif
@@ -119,22 +149,15 @@ export default {
       bus.fire('emulate-node-click', this.pars.node);
     },
 
-    goToOtherNode(node){
-      if(node)
-      {
+    goToNode(node){
+      if(node) {
         bus.fire('emulate-node-click', node);
       }
     },
-    goToLeastSimilar(){
-      if (this.leastSimilarNode){
-        bus.fire('emulate-node-click', this.leastSimilarNode);
-      }
-    },
 
-    goToMostSimilar(){
-      if (this.mostSimilarNode){
-        bus.fire('emulate-node-click', this.mostSimilarNode);
-      }
+    nodeTitle(node)
+    {
+      return node ? node.data.label : 'None?'
     }
   },
 
@@ -147,24 +170,6 @@ export default {
 			}
 			return {label: 'No story selected ...'}
 		},
-
-
-
-    mostSimilarTitle(){
-      if(this.mostSimilarNode)
-      {
-        return this.mostSimilarNode.data.label
-      }
-      return 'None?'
-    },
-
-    leastSimilarTitle(){
-      if(this.leastSimilarNode)
-      {
-        return this.leastSimilarNode.data.label
-      }
-      return 'None?'
-    }
 	}
 }
 
