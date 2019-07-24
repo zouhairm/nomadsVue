@@ -250,7 +250,7 @@ function getStoryFullText(node_id, year = '2018')
   margin: 20px 0px;
   white-space: pre-line;
 
-  max-height: 40vw;
+  max-height: 30vw;
   overflow-y: scroll;
 
   background: rgba(150, 150, 150, 0.4);

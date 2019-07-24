@@ -161,17 +161,24 @@ function loadGraph(newGraph) {
   canvas.ondblclick = resetAllNodes
   canvas.onwheel = function (e) {
       let mapboxz = mapbox.getZoom()
+      let webglz = renderer.getTransform().scale
 
-      if(e.deltaY < 0 && mapboxz < 10) {
-        // renderer.zoomIn()
-        let scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
-        renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
+      console.log(mapboxz,webglz,e.deltaY)
+
+      let scaleFactor = 1;
+      if(e.deltaY < 0 && mapboxz < 10) { // renderer.zoomIn()
+        scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
+        webglz *= scaleFactor
+        if(Math.log2(webglz) + 1 > 10) return
       } 
-      else if (mapboxz > 1){
-        // renderer.zoomOut()
-        let scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
-        renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
+      else if (e.deltaY > 0 && mapboxz > 1){ // renderer.zoomOut()
+        scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
+        webglz *= scaleFactor
+        if(Math.log2(webglz) + 1 < 1) return
       }
+      renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
+      renderer.getTransform().scale = webglz
+
       renderer.rerender()
       setTimeout(function() {renderer.rerender()}, 200);
       
@@ -328,15 +335,9 @@ function zoomTo(desiredScale, currentScale) {
     //Recurse if we are not yet at the right scale!
     if(Math.abs(desiredScale - newScale) > Math.abs(currentScale - newScale)/2)
     {
-       mapbox.disableZoomPan = true
         setTimeout(function() {
             zoomTo(desiredScale, newScale);
         }, 16);
-    }
-    else
-    {
-      //we've arrived, re-nable mapbox event!
-      mapbox.disableZoomPan = false
     }
 }
 
