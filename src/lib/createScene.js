@@ -24,6 +24,10 @@ export function getNeighborhood(graph, node)
 }
 
 
+
+
+
+
 export function createScene(canvas, _mapbox = null) {
 // Since graph can be loaded dynamically, we have these uninitialized
 // and captured into closure. loadGraph will do the initialization
@@ -55,6 +59,7 @@ return {
   dispose,
   resetView,
   toggleLayout,
+  funkyLayout
 };
 
 
@@ -79,11 +84,19 @@ function loadGraph(newGraph) {
   //positions are directly from the data 
   layout = Viva.Graph.Layout.constant(graph);
 
+  var forceLayout = Viva.Graph.Layout.forceDirected(graph, {
+        springLength : 10,
+        springCoeff : 0.0005,
+        dragCoeff : 0.02,
+        gravity : -1.2
+    })
+
   //For that, we over-write the placeNode callback
   layout.placeNode(geoColocPositioner);
   // Run one step so that node positions are computed
   layout.step();
   rendererSettings.layout = layout;
+  rendererSettings.forceLayout = forceLayout;
 
   //******************************************
   //*************** Graphics *****************
@@ -188,6 +201,7 @@ function loadGraph(newGraph) {
   rendererSettings.renderLinks= false;  //by default we won't render links, 
   renderer = Viva.Graph.View.renderer(graph, rendererSettings);
   window.renderer = renderer;
+  window.rendererSettings = rendererSettings;
   if(renderer)
   {
     renderer.run();
@@ -422,9 +436,46 @@ function resetView() {
 }
 
 
+
 function dispose() {
   // cancelAnimationFrame(rafHandle);
   bus.off('load-graph', loadGraph);
+}
+
+
+
+function funkyLayout()
+{
+  // rendererSettings.layout = rendererSettings.forceLayout;
+
+  // placeNode(function(node) {
+  //   // read node position from force directed layout:
+  //   return newLayout.getNodePosition(node.id);
+  //   });
+
+  // // set custom node placement callback for layout.
+  // var newLayout = Viva.Graph.Layout.forceDirected(graph, {
+  //       springLength : 10,
+  //       springCoeff : 0.0005,
+  //       dragCoeff : 0.02,
+  //       gravity : -1.2
+  //   })
+
+  // newLayout.step()
+  rendererSettings.layout.placeNode(function(node) {
+    // read node position from force directed layout:
+    // console.log(node.id)
+    return rendererSettings.forceLayout.getNodePosition(node.id);
+    });
+  for (let i = 0 ; i < 10; ++i)
+  {
+    rendererSettings.forceLayout.step()
+  }
+  renderer.run(10)
+  renderer.rerender()
+
+  // setInterval(() => {newLayout.step(); renderer.rerender()}, 1000)
+
 }
 
 // // https://github.com/anvaka/VivaGraphJS/issues/69

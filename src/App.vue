@@ -45,6 +45,7 @@
         </p>
 
         <a @click.prevent='showFilter = !showFilter' class='filter-link'>Filter</a>
+        <a @click.prevent='runFunky' class='funky-link'>Relayout</a>
 
     </div>
 
@@ -84,13 +85,15 @@ export default {
 
 
   methods: {
+    runFunky(){
+      this.scene.funkyLayout();
+    },
     toggleLayout(){
       this.scene.toggleLayout();
     },
     resetView() {
       this.scene.resetView()
     },
-
   },
 
   computed:
@@ -279,6 +282,7 @@ a {
   cursor: pointer;
   z-index: 1;
 }
+.funky-link, 
 .filter-link {
   background: rgba(0, 120, 120, 0.4);
   padding: 5px 10px;
@@ -288,6 +292,9 @@ a {
   border-radius: 5%;
   cursor: pointer;
   z-index: 1;
+}
+.funky-link {
+  bottom: 100px;
 }
 .close-about {
   float: right;
