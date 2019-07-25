@@ -175,10 +175,9 @@ export default {
 
 
 
-function getStoryFullText(node_id, year = '2018')
+function getStoryFullText(node_id, year)
 {
-  let storageURL = 'https://storage.googleapis.com/nomadstories/dataFolder/'
-  storageURL += year + '/'
+  let storageURL = `https://storage.googleapis.com/nomadstories/dataFolder/${year}/`
   storageURL += encodeURIComponent(node_id)
 
   return axios.get(storageURL).then( 

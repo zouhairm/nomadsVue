@@ -3,21 +3,28 @@
   <div class='filter-box' v-if='showFilter'>
     <div class="f-year">
       Story Years: 
-      <input type="radio" value="2018" class='f-year' v-model="selectedYear">
-      <label for="one">2018</label>
-      <input type="radio" value="2019" class='f-year' v-model="selectedYear">
-      <label for="two">2019</label>
+      <input type="radio" value="2018" v-model="selectedYear">
+                          <label>2018</label>
+      <input type="radio" value="2019" v-model="selectedYear">
+                          <label>2019</label>
     </div>
-    More to come ...
+    <div class="f-geo">
+      Layout Clustering: 
+      <input type="radio" value="geo" v-model="selectedLayout">
+                          <label>Geo</label>
+      <input type="radio" value="mostSimilar" v-model="selectedLayout">
+                          <label>Similar</label>
+      <input type="radio" value="leastSimilar" v-model="selectedLayout">
+                          <label>Disimilar</label>
+    </div>
 
-    <a href='#' @click.prevent='showFilter = false'  class='close-filter' title='Close filter'>[x]</a>
+    <a href='#' @click.prevent='showFilter = false'  class='close-filter' title='Close'>[x]</a>
   </div>
 </template>
 
 
 <script>
 /*eslint no-console: ["error", { allow: [ "warn", "error"] }] */
-import bus from '../lib/bus';
 import {getGraph} from '../lib/getGraph';
 
 export default {
@@ -26,6 +33,7 @@ export default {
   data() {
     return {
       selectedYear: '2019',
+      selectedLayout: 'geo',
       showFilter: false,
       leastSimilarNode: null,
       otherRelatedNodes: [],
@@ -38,31 +46,26 @@ export default {
     selectedYear:
     {
       handler (new_year, old_year) { 
-        if(new_year != old_year)
-        {
+        if(new_year != old_year){
           getGraph(new_year);
-          this.showFilter = false;
         }
       }//end handler
     },
+    selectedLayout:
+    {
+      handler (new_layout, old_layout){
+        if(new_layout != old_layout){
+          this.$parent.scene.toggleLayout(new_layout)
+        }
+      }
+    },
     show: {
-      // immediate: true, 
+      deep: true,
       handler (new_val, _oldpars) {  /* eslint-disable-line no-unused-vars */
-        this.showFilter = !this.showFilter
+        this.showFilter = new_val
       }//end handler
     }//end pars
   },//end watch
-
-
-  methods:
-  {
-    readMore(){
-      //pretend node was clicked which will get App.vue to trigger on that node
-      //therefore this component will re-render but with showdetails = true...
-      //hacky, but that's because we're not allowed to change showdetails as its a prop :s
-      bus.fire('emulate-node-click', this.pars.node);
-    },
-  },
 }
 
 
@@ -92,6 +95,9 @@ export default {
 
 }
 .f-year input { 
+  margin: 10px;
+}
+.f-geo input {
   margin: 10px;
 }
 

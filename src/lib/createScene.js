@@ -8,7 +8,6 @@ import {WebglCircle, CircleNodeShader} from './WebglCircleShader';
 import Viva from 'vivagraphjs';
 
 
-
 var traverseNodes = require('ngraph.traverse').nodes;
 var traverseLinks = require('ngraph.traverse').links;
 
@@ -59,7 +58,6 @@ return {
   dispose,
   resetView,
   toggleLayout,
-  funkyLayout
 };
 
 
@@ -72,6 +70,7 @@ function loadGraph(newGraph) {
     resetAllNodes();
     renderer.dispose();
     renderer = null
+    rendererSettings.freakyLayout = null;
   }
 
   //save graph to module copy
@@ -84,19 +83,13 @@ function loadGraph(newGraph) {
   //positions are directly from the data 
   layout = Viva.Graph.Layout.constant(graph);
 
-  var forceLayout = Viva.Graph.Layout.forceDirected(graph, {
-        springLength : 10,
-        springCoeff : 0.0005,
-        dragCoeff : 0.02,
-        gravity : -1.2
-    })
 
-  //For that, we over-write the placeNode callback
+  //Next we over-write the placeNode callback
+  //placeNode will call updateNodePositions() which will update
+  //the layoutNodes[] array with the positions computed
+  //by geoColocPositioner
   layout.placeNode(geoColocPositioner);
-  // Run one step so that node positions are computed
-  layout.step();
   rendererSettings.layout = layout;
-  rendererSettings.forceLayout = forceLayout;
 
   //******************************************
   //*************** Graphics *****************
@@ -171,6 +164,16 @@ function loadGraph(newGraph) {
 
 
   canvas.ondblclick = resetAllNodes
+  window.onkeyup = (e) => {
+        if (e.key === 'l' || e.key === 'k')
+          {
+            rendererSettings.renderLinks = !rendererSettings.renderLinks
+
+            let selector = e.key === 'l' ? 'mostSimilar' : 'leastSimilar';
+            traverseLinks(graph).forEach( (l) => highlightLink(l, rendererSettings.renderLinks && l.data[selector]))
+            renderer.rerender()
+          }
+      }
   canvas.onwheel = function (e) {
       let mapboxz = mapbox.getZoom()
       let webglz = renderer.getTransform().scale
@@ -290,12 +293,14 @@ function highlightNode(node, high) {
   var nodeUI = graphics.getNodeUI(node.id);
   
   //Change node color/size
+  if(nodeUI)
+  {
+    let ca = getNodeColorAlpha(node, high);
+    nodeUI.color = ca.color;
+    nodeUI.alpha = ca.alpha;
 
-  let ca = getNodeColorAlpha(node, high);
-  nodeUI.color = ca.color;
-  nodeUI.alpha = ca.alpha;
-
-  nodeUI.size  = getNodeSize(node, high);
+    nodeUI.size  = getNodeSize(node, high);
+  }
 
 }
 
@@ -406,27 +411,6 @@ function getLineColor(link)
 }
 
 
-
-function toggleLayout(){
-  //doesn't seem to be working ...
-  //might need to do something different to change renderer?
-  
-  if(renderer)
-  {
-    var newLayout = Viva.Graph.Layout.forceDirected(graph, {
-        springLength : 10,
-        springCoeff : 0.0005,
-        dragCoeff : 0.02,
-        gravity : -1.2
-    });
-
-    renderer.reset();
-    renderer.layout = newLayout;
-    renderer.layout.step()
-    renderer.rerender();
-
-  }
-}
 function resetView() {
   if(renderer)
   {
@@ -444,49 +428,81 @@ function dispose() {
 
 
 
-function funkyLayout()
+function toggleLayout(lType)
 {
-  // rendererSettings.layout = rendererSettings.forceLayout;
 
-  // placeNode(function(node) {
-  //   // read node position from force directed layout:
-  //   return newLayout.getNodePosition(node.id);
-  //   });
-
-  // // set custom node placement callback for layout.
-  // var newLayout = Viva.Graph.Layout.forceDirected(graph, {
-  //       springLength : 10,
-  //       springCoeff : 0.0005,
-  //       dragCoeff : 0.02,
-  //       gravity : -1.2
-  //   })
-
-  // newLayout.step()
-  rendererSettings.layout.placeNode(function(node) {
-    // read node position from force directed layout:
-    // console.log(node.id)
-    return rendererSettings.forceLayout.getNodePosition(node.id);
-    });
-  for (let i = 0 ; i < 10; ++i)
+  //dispose of any forceDirLayout if we already have one
+  if(rendererSettings.forceDirLayout)
   {
-    rendererSettings.forceLayout.step()
+    rendererSettings.forceDirLayout.timer.stop()
+    rendererSettings.forceDirLayout.dispose()
+    rendererSettings.forceDirLayout = null
   }
-  renderer.run(10)
-  renderer.rerender()
 
-  // setInterval(() => {newLayout.step(); renderer.rerender()}, 1000)
+  //Reset position of nodes
+  graph.forEachNode( n => {n.position = {x: n.data.position.x, y: n.data.position.y} })
+
+  if (lType == 'mostSimilar' || lType == 'leastSimilar'){
+    var  selector = lType == 'mostSimilar'  ? 'mostSimilar' : 'leastSimilar';
+    var nselector = lType == 'leastSimilar' ? 'mostSimilar' : 'leastSimilar';
+
+    rendererSettings.forceDirLayout = Viva.Graph.Layout.forceDirected(graph, {
+          springLength : 50,
+          springCoeff : 0.001,
+          dragCoeff : .1,
+          gravity : -.01,
+          springTransform: function(l, s) {
+            if (l.data[selector])      { s.length = 5;            s.weight = 3.0;}
+            else if (l.data[nselector]){ s.length = l.data.d*500; s.weight = 0.01;}
+            else                       { s.length = l.data.d*50;  s.weight = 0.001;}
+          }
+      })
+
+    rendererSettings.layout.placeNode(function(node) {
+      // read node position from force directed layout:
+      return graphics.getNodeUI(node.id).position = rendererSettings.forceDirLayout.getNodePosition(node.id);
+    });
+
+  } else if (lType === 'geo'){
+    rendererSettings.layout.placeNode(geoColocPositioner);
+    rendererSettings.layout.step();
+    graph.forEachNode( n => {geoColocPositioner(n); graphics.getNodeUI(n.id).position = n.position = n.data.position});
+
+    // graph.forEachNode( n => {n.position = n.data.position})
+  } else {
+    console.error('Unsupported layout type ' + lType)
+    return;
+  }
+
+  resetAllNodes()
+
+  //Finally, if this is a non-geo layout, simulate it
+  if(lType != 'geo' && rendererSettings.forceDirLayout)
+  {
+    rendererSettings.renderLinks = true
+    //highlight links
+    traverseLinks(graph).forEach( (l) => highlightLink(l, l.data[lType]))
+    // let renderer know we want it to render links
+    rendererSettings.renderLinks = true
+    //Finally run a timer to step the simulation and render.
+    rendererSettings.forceDirLayout.maxSteps = 150
+    rendererSettings.forceDirLayout.timer =
+            Viva.Graph.Utils.timer(() => {
+              try {
+                let stable = rendererSettings.forceDirLayout.step(); 
+                renderer.rerender();
+                return (rendererSettings.forceDirLayout.maxSteps-- > 0);
+              } catch { 
+                return false;
+              }
+            }, 40)
+  } else {
+    //unhighlight links
+    traverseLinks(graph).forEach( (l) => highlightLink(l, false))
+    rendererSettings.renderLinks = false;
+    renderer.rerender();
+  }
 
 }
-
-// // https://github.com/anvaka/VivaGraphJS/issues/69
-// var preciseCheck = function (nodeUI, x, y) { 
-//   if (nodeUI && nodeUI.size) { 
-//   var pos = nodeUI.position, half = nodeUI.size / 2; 
-//   return (((pos.x - x) * (pos.x - x) + (pos.y - y) * (pos.y - y)) < (half*half)); 
-// /* return pos.x - half < x && x < pos.x + half && pos.y - half < y && y < pos.y + half;*/ 
-// } 
-
-// return true; }
-
 
 } //end of Export

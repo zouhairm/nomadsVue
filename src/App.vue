@@ -2,10 +2,6 @@
   <div id="app">
     <div id="mapCanvas"></div>
     <div id="cnv"></div>
-<!-- 
-    <div id="controls">
-      <a href="#" @click.prevent='toggleLayout' class='btn-command'>Reset Layout</a>
-    </div> -->
 
 
     <story-view id='story' :pars='storyViewPars'  v-if='showStory'> </story-view>
@@ -44,9 +40,7 @@
             Made during late night hours by <a target="_blank" href="https://zouhairm.github.io/bio">Zouhair M</a>
         </p>
 
-        <a @click.prevent='showFilter = !showFilter' class='filter-link'>Filter</a>
-        <a @click.prevent='runFunky' class='funky-link'>Relayout</a>
-
+        <a @click.prevent='showFilter = !showFilter' class='options-link'>Settings</a>
     </div>
 
 
@@ -74,26 +68,19 @@ export default {
     
     return {
       scene: null,
-      showAbout: true,
+      showAbout: false,
       showFilter: false,
       graph: null,
-      year: '2019',
       mapbox: null,
-      storyViewPars: { node: null, graph: null, showdetails: false},
+      storyViewPars: { node: null, showdetails: false},
+      year: '2019',
+      layoutType: 'geo', 
     };
   },
 
 
   methods: {
-    runFunky(){
-      this.scene.funkyLayout();
-    },
-    toggleLayout(){
-      this.scene.toggleLayout();
-    },
-    resetView() {
-      this.scene.resetView()
-    },
+
   },
 
   computed:
@@ -282,8 +269,7 @@ a {
   cursor: pointer;
   z-index: 1;
 }
-.funky-link, 
-.filter-link {
+.options-link {
   background: rgba(0, 120, 120, 0.4);
   padding: 5px 10px;
   margin-right: 5px;
@@ -293,9 +279,7 @@ a {
   cursor: pointer;
   z-index: 1;
 }
-.funky-link {
-  bottom: 100px;
-}
+
 .close-about {
   float: right;
   margin-right: 14px;
