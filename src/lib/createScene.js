@@ -176,18 +176,24 @@ function loadGraph(newGraph) {
       }
   canvas.onwheel = function (e) {
       let mapboxz = mapbox.getZoom()
+      if(mapbox.disableZoomPan){ 
+        mapboxz = 5 //this will ensure that both zoom-in & out will occur
+      }
+
+
       let webglz = renderer.getTransform().scale
 
       let scaleFactor = 1;
-      if(e.deltaY < 0 && mapboxz < 10) { // renderer.zoomIn()
-        scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
+      let delta = e.wheelDelta/3 
+      if(delta < 0 && mapboxz < 10) { // renderer.zoomIn()
+        scaleFactor = Math.pow(1 + 0.4, -0.1*delta);
         webglz *= scaleFactor
-        if(Math.log2(webglz) + 1 > 10) return
+        if(!mapboxz.disableZoomPan && (Math.log2(webglz) + 1 > 10)) return
       } 
-      else if (e.deltaY > 0 && mapboxz > 1){ // renderer.zoomOut()
-        scaleFactor = Math.pow(1 + 0.4, -0.1*e.deltaY);
+      else if (delta > 0 && mapboxz > 1){ // renderer.zoomOut()
+        scaleFactor = Math.pow(1 + 0.4, -0.1*delta);
         webglz *= scaleFactor
-        if(Math.log2(webglz) + 1 < 1) return
+        if(!mapboxz.disableZoomPan && (Math.log2(webglz) + 1 < 1)) return
       }
       renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
       renderer.getTransform().scale = webglz
@@ -306,7 +312,7 @@ function highlightNode(node, high) {
 
 
 function panBackground(e){
-    if(mapbox.disableZoomPan == false || mapbox.disableZoomPan == undefined)
+    if(! mapbox.disableZoomPan )
     {
       //First, let's match the zoom. 
       //Note that Mapbox uses a different convention for zoom...
@@ -333,20 +339,55 @@ function panBackground(e){
       //We're off by 10 pixels - tell renderer to move back!
       if(Math.abs(actualCenter_xy.y - mapbox._container.clientHeight/2) > 5)
       {
-        renderer.moveTo(newCenter_xy.x, newCenter_xy.y - (newCenter_latlon.lat < 0 ? 5: -5))
+        renderer.moveTo(newCenter_xy.x, newCenter_xy.y - (newCenter_latlon.lat < 0 ? 5: -5))         
       }
     }
 }
 
-function fitAndCenter(){
-  renderer.moveTo(mapbox._container.clientWidth/2,
-                  mapbox._container.clientHeight/2);
-  zoomTo(1, renderer.getTransform().scale);
+function fitAndCenter(rerender = true, desiredZoom = 1){
+  let midPoint = {
+        x: mapbox._container.clientWidth/2,
+        y: mapbox._container.clientHeight/2,
+      };
 
-  setTimeout(function() {renderer.rerender()}, 200);
+  renderer.moveTo(midPoint.x, midPoint.y);
+
+  if(desiredZoom == null){ 
+    let graphRect = layout.getGraphRect();
+    if(rendererSettings.forceDirLayout){
+      graphRect = rendererSettings.forceDirLayout.getGraphRect()
+    }
+    let graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
+    let screenSize = Math.min(midPoint.x, midPoint.y)*2
+    desiredZoom = screenSize / graphSize * 0.8;
+  }
+
+  // zoomToOneShot(desiredZoom);
+  zoomTo(desiredZoom, renderer.getTransform().scale)
+
+  if(rerender) {
+    renderer.rerender()
+    setTimeout(function() {renderer.rerender()}, 200);
+  }
 }
 
-//From https://github.com/anvaka/VivaGraphJS/issues/57
+function zoomToOneShot(desiredScale, zPoint)
+{
+  if(zPoint == undefined)
+  {
+      zPoint = {
+        x: mapbox._container.clientWidth/2,
+        y: mapbox._container.clientHeight/2,
+      };
+  }
+  //get current scale:
+  let currentScale = renderer.getTransform().scale
+  let scaleFactor = desiredScale / currentScale
+
+  renderer.getGraphics().scale(scaleFactor, zPoint)
+  renderer.getTransform().scale = scaleFactor
+}
+// From https://github.com/anvaka/VivaGraphJS/issues/57
 function zoomTo(desiredScale, currentScale) {
     // zoom API in vivagraph 0.5.x is silly. There is no way to pass transform
     // directly. Maybe it will be fixed in future, for now this is the best I could do:    
@@ -452,9 +493,9 @@ function toggleLayout(lType)
           dragCoeff : .1,
           gravity : -.01,
           springTransform: function(l, s) {
-            if (l.data[selector])      { s.length = 5;            s.weight = 3.0;}
-            else if (l.data[nselector]){ s.length = l.data.d*500; s.weight = 0.01;}
-            else                       { s.length = l.data.d*50;  s.weight = 0.001;}
+            if (l.data[selector])      { s.length = 5;             s.weight = 3.0;}
+            else if (l.data[nselector]){ s.length = l.data.d*1000; s.weight = 0.001;}
+            else                       { s.length = l.data.d*50;   s.weight = 0.001;}
           }
       })
 
@@ -479,28 +520,39 @@ function toggleLayout(lType)
   //Finally, if this is a non-geo layout, simulate it
   if(lType != 'geo' && rendererSettings.forceDirLayout)
   {
+    mapbox.disableZoomPan = true
     rendererSettings.renderLinks = true
-    //highlight links
-    traverseLinks(graph).forEach( (l) => highlightLink(l, l.data[lType]))
+
     // let renderer know we want it to render links
-    rendererSettings.renderLinks = true
     //Finally run a timer to step the simulation and render.
-    rendererSettings.forceDirLayout.maxSteps = 150
+    rendererSettings.forceDirLayout.maxSteps = 200
     rendererSettings.forceDirLayout.timer =
             Viva.Graph.Utils.timer(() => {
               try {
                 let stable = rendererSettings.forceDirLayout.step(); 
+                if(rendererSettings.forceDirLayout.maxSteps % 40 == 0){
+                  fitAndCenter(false, null)
+                }
+                //highlight links halfway through
+                //TODO: do this progressively as springs reach equilibrium ?
+                if(rendererSettings.forceDirLayout.maxSteps == 100)
+                {
+                  traverseLinks(graph).forEach( (l) => highlightLink(l, l.data[lType]))
+                  rendererSettings.renderLinks = true
+                }
                 renderer.rerender();
-                return (rendererSettings.forceDirLayout.maxSteps-- > 0);
+                return (!stable && rendererSettings.forceDirLayout.maxSteps-- > 0);
               } catch { 
                 return false;
               }
-            }, 40)
+            }, 30)
   } else {
+    //re-enable mapbox panning/zooming
+    mapbox.disableZoomPan = false
     //unhighlight links
     traverseLinks(graph).forEach( (l) => highlightLink(l, false))
     rendererSettings.renderLinks = false;
-    renderer.rerender();
+    fitAndCenter()
   }
 
 }

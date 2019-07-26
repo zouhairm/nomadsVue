@@ -25,6 +25,7 @@
 
 <script>
 /*eslint no-console: ["error", { allow: [ "warn", "error"] }] */
+import bus from '../lib/bus'
 import {getGraph} from '../lib/getGraph';
 
 export default {
@@ -40,6 +41,10 @@ export default {
       graph: null,
       storyText: '',
     };
+  },
+
+  created() {
+    bus.on('load-graph', () => {this.selectedLayout = 'geo'})
   },
 
   watch: {

@@ -119,6 +119,8 @@ export default {
       maxZoom: 10,
     });
     this.mapbox.scrollZoom.disable()
+    this.mapbox.dragPan.disable()
+
     window.mapbox = this.mapbox
 
 
