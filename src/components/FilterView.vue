@@ -65,7 +65,6 @@ export default {
       }
     },
     show: {
-      deep: true,
       handler (new_val, _oldpars) {  /* eslint-disable-line no-unused-vars */
         this.showFilter = new_val
       }//end handler
@@ -78,7 +77,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 * {
     box-sizing: border-box;
     z-index: 1; /* this might backfire? */
@@ -97,8 +96,8 @@ export default {
   overflow-y: scroll;
   border-radius: 2%;
   z-index: 1;
-
 }
+
 .f-year input { 
   margin: 10px;
 }

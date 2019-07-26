@@ -175,26 +175,28 @@ function loadGraph(newGraph) {
           }
       }
   canvas.onwheel = function (e) {
-      let mapboxz = mapbox.getZoom()
-      if(mapbox.disableZoomPan){ 
-        mapboxz = 5 //this will ensure that both zoom-in & out will occur
-      }
+      let mZoom = mapbox.getZoom()
 
+      if(mapbox.disableZoomPan){ 
+        mZoom = 5 //this will ensure that both zoom-in & out will occur
+      }
 
       let webglz = renderer.getTransform().scale
 
       let scaleFactor = 1;
-      let delta = e.wheelDelta/3 
-      if(delta < 0 && mapboxz < 10) { // renderer.zoomIn()
+      let delta = -Math.sign(e.wheelDelta)
+
+      if(delta < 0 && mZoom < 10) { // renderer.zoomIn()
         scaleFactor = Math.pow(1 + 0.4, -0.1*delta);
         webglz *= scaleFactor
-        if(!mapboxz.disableZoomPan && (Math.log2(webglz) + 1 > 10)) return
+        if(!mapbox.disableZoomPan && (Math.log2(webglz) + 1 > 10)) return
       } 
-      else if (delta > 0 && mapboxz > 1){ // renderer.zoomOut()
+      else if (delta > 0 && mZoom > 1){ // renderer.zoomOut()
         scaleFactor = Math.pow(1 + 0.4, -0.1*delta);
         webglz *= scaleFactor
-        if(!mapboxz.disableZoomPan && (Math.log2(webglz) + 1 < 1)) return
+        if(!mapbox.disableZoomPan && (Math.log2(webglz) + 1 < 1)) return
       }
+
       renderer.getGraphics().scale(scaleFactor, {x: e.pageX, y: e.pageY})
       renderer.getTransform().scale = webglz
 
@@ -229,7 +231,8 @@ function resetAllNodes()
 
   bus.fire('node-hovered', null)
 
-  fitAndCenter();
+  // fitAndCenter(true, rendererSettings.forceDirLayout ? null : 1);
+  fitAndCenter()
 }
 
 function hoverHandler(node)
@@ -371,22 +374,22 @@ function fitAndCenter(rerender = true, desiredZoom = 1){
   }
 }
 
-function zoomToOneShot(desiredScale, zPoint)
-{
-  if(zPoint == undefined)
-  {
-      zPoint = {
-        x: mapbox._container.clientWidth/2,
-        y: mapbox._container.clientHeight/2,
-      };
-  }
-  //get current scale:
-  let currentScale = renderer.getTransform().scale
-  let scaleFactor = desiredScale / currentScale
+// function zoomToOneShot(desiredScale, zPoint)
+// {
+//   if(zPoint == undefined)
+//   {
+//       zPoint = {
+//         x: mapbox._container.clientWidth/2,
+//         y: mapbox._container.clientHeight/2,
+//       };
+//   }
+//   //get current scale:
+//   let currentScale = renderer.getTransform().scale
+//   let scaleFactor = desiredScale / currentScale
 
-  renderer.getGraphics().scale(scaleFactor, zPoint)
-  renderer.getTransform().scale = scaleFactor
-}
+//   renderer.getGraphics().scale(scaleFactor, zPoint)
+//   renderer.getTransform().scale = scaleFactor
+// }
 // From https://github.com/anvaka/VivaGraphJS/issues/57
 function zoomTo(desiredScale, currentScale) {
     // zoom API in vivagraph 0.5.x is silly. There is no way to pass transform
@@ -480,6 +483,8 @@ function toggleLayout(lType)
     rendererSettings.forceDirLayout = null
   }
 
+  resetAllNodes()
+
   //Reset position of nodes
   graph.forEachNode( n => {n.position = {x: n.data.position.x, y: n.data.position.y} })
 
@@ -515,8 +520,6 @@ function toggleLayout(lType)
     return;
   }
 
-  resetAllNodes()
-
   //Finally, if this is a non-geo layout, simulate it
   if(lType != 'geo' && rendererSettings.forceDirLayout)
   {
@@ -530,19 +533,21 @@ function toggleLayout(lType)
             Viva.Graph.Utils.timer(() => {
               try {
                 let stable = rendererSettings.forceDirLayout.step(); 
-                if(rendererSettings.forceDirLayout.maxSteps % 40 == 0){
+                if(rendererSettings.forceDirLayout.maxSteps % 40 == 0 || stable){
                   fitAndCenter(false, null)
                 }
                 //highlight links halfway through
                 //TODO: do this progressively as springs reach equilibrium ?
-                if(rendererSettings.forceDirLayout.maxSteps == 100)
+                if(rendererSettings.forceDirLayout.maxSteps == 25 || stable)
                 {
                   traverseLinks(graph).forEach( (l) => highlightLink(l, l.data[lType]))
                   rendererSettings.renderLinks = true
                 }
                 renderer.rerender();
                 return (!stable && rendererSettings.forceDirLayout.maxSteps-- > 0);
-              } catch { 
+              } 
+              catch { 
+                renderer.rerender();
                 return false;
               }
             }, 30)

@@ -143,7 +143,7 @@ function compileRegex(pattern) {
 
 </script>
 
-<style>
+<style scoped>
 * {
     box-sizing: border-box;
     z-index: 1; /* this might backfire? */

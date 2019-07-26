@@ -190,7 +190,7 @@ function getStoryFullText(node_id, year)
 </script>
 
 
-<style>
+<style scoped>
 * {
     box-sizing: border-box;
     z-index: 1; /* this might backfire? */
