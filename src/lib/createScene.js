@@ -223,9 +223,11 @@ function loadGraph(newGraph) {
   }
 
   //saving these for debugging
-  // window.renderer = renderer;
-  // window.rendererSettings = rendererSettings;
-
+  if(process.env.NODE_ENV == 'development') {    
+    window.renderer = renderer;
+    window.rendererSettings = rendererSettings;
+    window.graph = graph
+  }
 }
 
 
@@ -283,6 +285,11 @@ function highlightNeighborhood(node)
 
   return nhood
 }
+function highlightOnlyStronglyDisimilarLinks()
+{
+  traverseLinks(graph).forEach(l => highlightLink(l, isStronglyDisimilar(l)))
+}
+
 
 function highlightLink(link, high) {
   if(high){
@@ -360,8 +367,6 @@ function fitAndCenter(rerender = true, desiredZoom = 1){
         y: mapbox._container.clientHeight/2,
       };
 
-  renderer.moveTo(midPoint.x, midPoint.y);
-
   if(desiredZoom == null){ 
     let graphRect = layout.getGraphRect();
     if(rendererSettings.forceDirLayout){
@@ -373,7 +378,10 @@ function fitAndCenter(rerender = true, desiredZoom = 1){
   }
 
   // zoomToOneShot(desiredZoom);
-  zoomTo(desiredZoom, renderer.getTransform().scale)
+  zoomTo(desiredZoom, renderer.getTransform().scale,
+        () => renderer.moveTo(midPoint.x, midPoint.y) //move once zooming is done with..
+        )
+
 
   if(rerender) {
     renderer.rerender()
@@ -398,7 +406,7 @@ function fitAndCenter(rerender = true, desiredZoom = 1){
 //   renderer.getTransform().scale = scaleFactor
 // }
 // From https://github.com/anvaka/VivaGraphJS/issues/57
-function zoomTo(desiredScale, currentScale) {
+function zoomTo(desiredScale, currentScale, cb = null) {
     // zoom API in vivagraph 0.5.x is silly. There is no way to pass transform
     // directly. Maybe it will be fixed in future, for now this is the best I could do:    
     let newScale = currentScale;
@@ -414,8 +422,10 @@ function zoomTo(desiredScale, currentScale) {
     if(Math.abs(desiredScale - newScale) > Math.abs(currentScale - newScale)/2)
     {
         setTimeout(function() {
-            zoomTo(desiredScale, newScale);
+            zoomTo(desiredScale, newScale, cb);
         }, 16);
+    } else if(cb != null){
+      cb();
     }
 }
 
@@ -478,6 +488,48 @@ function dispose() {
 }
 
 
+function isStronglyDisimilar(link, minCount = 3)
+{
+  if(!link.data.leastSimilar) return false;
+
+  let nLeast = [new Set(), new Set()]
+
+  graph.getNode(link.fromId).links.forEach( l => {if (l.data.leastSimilar) nLeast[0].add(l.fromId).add(l.toId)} )
+  graph.getNode(link.toId  ).links.forEach( l => {if (l.data.leastSimilar) nLeast[1].add(l.fromId).add(l.toId)} )
+
+  //minCount + 1 since set will the self node in it
+  return (nLeast[0].size >= (minCount + 1) || nLeast[1].size >= (minCount + 1))
+}
+
+function springWeight(l, s, lType)
+{
+
+  if(lType == 'mostSimilar')
+  {
+    if (l.data.mostSimilar) {
+       s.length = 5;  s.weight = 3.0;
+     } else if (l.data.leastSimilar) { 
+       s.length = l.data.d*1000; s.weight = 0.001;
+     } else { 
+      s.length = l.data.d*50;   s.weight = 0.001;
+    }
+    return
+  }
+
+  //else == lType = leastSimilar
+  if(l.data.leastSimilar){
+    //we will see if this link is connected to a node
+    //that has at least a total of 3 dissimilar nodes
+    //otherwise we won't use it in the clustering
+    s.length = 5;
+    s.weight = isStronglyDisimilar(l, 3) ? 3.0 : 0.001;
+  } else if (l.data.mostSimilar) { 
+    s.length = l.data.d*1000; 
+    s.weight = 0.001;
+  } else { 
+    s.length = l.data.d*50;   s.weight = 0.001;
+  }
+}
 
 function toggleLayout(lType)
 {
@@ -496,19 +548,13 @@ function toggleLayout(lType)
   graph.forEachNode( n => {n.position = {x: n.data.position.x, y: n.data.position.y} })
 
   if (lType == 'mostSimilar' || lType == 'leastSimilar'){
-    var  selector = lType == 'mostSimilar'  ? 'mostSimilar' : 'leastSimilar';
-    var nselector = lType == 'leastSimilar' ? 'mostSimilar' : 'leastSimilar';
-
+   
     rendererSettings.forceDirLayout = Viva.Graph.Layout.forceDirected(graph, {
           springLength : 50,
           springCoeff : 0.001,
           dragCoeff : .1,
           gravity : -.01,
-          springTransform: function(l, s) {
-            if (l.data[selector])      { s.length = 5;             s.weight = 3.0;}
-            else if (l.data[nselector]){ s.length = l.data.d*1000; s.weight = 0.001;}
-            else                       { s.length = l.data.d*50;   s.weight = 0.001;}
-          }
+          springTransform: ((l, s) => springWeight(l, s, lType))
       })
 
     rendererSettings.layout.placeNode(function(node) {
@@ -547,7 +593,11 @@ function toggleLayout(lType)
                 //TODO: do this progressively as springs reach equilibrium ?
                 if(rendererSettings.forceDirLayout.maxSteps == 25 || stable)
                 {
-                  traverseLinks(graph).forEach( (l) => highlightLink(l, l.data[lType]))
+                  if (lType == 'mostSimilar'){
+                    traverseLinks(graph).forEach( (l) => highlightLink(l, l.data[lType]))
+                  } else {
+                    highlightOnlyStronglyDisimilarLinks()
+                  }
                   rendererSettings.renderLinks = true
                 }
                 renderer.rerender();
