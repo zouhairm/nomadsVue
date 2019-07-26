@@ -41,7 +41,6 @@ rendererSettings = {
   interactive: 'drag' // node and scroll are disabled!
   }
 
-
 //Use event handler to register for a load-graph
 //event if graph is changed
 bus.on('load-graph', loadGraph);
@@ -211,13 +210,21 @@ function loadGraph(newGraph) {
   //Finally Ready to initialize and run the renderer!
   rendererSettings.renderLinks= false;  //by default we won't render links, 
   renderer = Viva.Graph.View.renderer(graph, rendererSettings);
-  window.renderer = renderer;
-  window.rendererSettings = rendererSettings;
+  rendererSettings.container.onresize = () => {
+    if (renderer) {
+      renderer.reset(); fitAndCenter();
+    }
+  }
+
   if(renderer)
   {
     renderer.run();
     fitAndCenter();
   }
+
+  //saving these for debugging
+  // window.renderer = renderer;
+  // window.rendererSettings = rendererSettings;
 
 }
 
