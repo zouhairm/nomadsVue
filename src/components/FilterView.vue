@@ -35,7 +35,7 @@ export default {
     return {
       selectedYear: '2019',
       selectedLayout: 'geo',
-      showFilter: false,
+      showFilter: true,
       leastSimilarNode: null,
       otherRelatedNodes: [],
       graph: null,
@@ -44,6 +44,7 @@ export default {
   },
 
   created() {
+    //FIXME: this probably fires toggleLayout unnecessarily
     bus.on('load-graph', () => {this.selectedLayout = 'geo'})
   },
 

@@ -11,17 +11,45 @@ import Viva from 'vivagraphjs';
 var traverseNodes = require('ngraph.traverse').nodes;
 var traverseLinks = require('ngraph.traverse').links;
 
-export function getNeighborhood(graph, node)
+export function getNeighborhood(graph, node, lType = 'geo', collector = undefined)
 //This will include node, its outgoing elements, and its neighbors
 {
-  var neighbors = {nodes: [node], links: []}
+  var neighbors = collector || {nodes: new Set([node]), links: new Set()}
 
-  traverseNodes(graph).neighbors(node.id).forEach( n => neighbors.nodes.push(n))
-  traverseLinks(graph).from(node.id).forEach( l => neighbors.links.push(l))
+  if(lType == 'geo')
+  {
+    traverseNodes(graph).neighbors(node.id).forEach( n => neighbors.nodes.add(n))
+    traverseLinks(graph).from(node.id).forEach( l => neighbors.links.add(l))
+  } else {
 
+    //in this case, we need to do some graph traversal but only
+    //following links that are most/least similar. And we will recurse ...
+
+    let newNodesIds = new Set([])
+
+    node.links.forEach( l => {
+      //if this is the kind of link we are interested in
+      // add it to the set of links and
+      // add the from/to nodes to the newNodes set
+      if(l.data[lType])
+      {
+        neighbors.links.add(l)
+        newNodesIds.add(l.fromId).add(l.toId)
+      }
+    })
+    //Next, for each of these node Ids, if we haven't already traversed it,
+    //we recurse to collect more stuff
+    newNodesIds.forEach(nodeId => 
+    {
+      let cNode = graph.getNode(nodeId)
+      if(! neighbors.nodes.has(cNode)){
+        neighbors.nodes.add(cNode)
+        getNeighborhood(graph, cNode, lType, neighbors)
+      }
+    })
+  }
   return neighbors
 }
-
 
 
 
@@ -38,7 +66,8 @@ let highlightedElements = {nodes: [], links: [], sticky: false}
 //Save where the graph will be rendered
 rendererSettings = {
   container: canvas,
-  interactive: 'drag' // node and scroll are disabled!
+  interactive: 'drag', // node and scroll are disabled!
+  layoutType: 'geo'
   }
 
 //Use event handler to register for a load-graph
@@ -54,6 +83,7 @@ getGraph()
 //the scene we return has the following member functions
 return {
   graph,
+  rendererSettings,
   dispose,
   resetView,
   toggleLayout,
@@ -130,7 +160,7 @@ function loadGraph(newGraph) {
 
         //however, we will still fire a node-hover-enter event
         //if the node is one of the highlighted ones!
-        if(highlightedElements.nodes.includes(node))
+        if(highlightedElements.nodes.has(node))
         {
           //when sticky, as if we clicked (so whole story will show)
           bus.fire('node-clicked', node)
@@ -153,7 +183,7 @@ function loadGraph(newGraph) {
   })
   .click(function (node) {
     if(highlightedElements.sticky){
-      if (highlightedElements.nodes.includes(node))
+      if (highlightedElements.nodes.has(node))
         clickHandler(node)
     } else{
        clickHandler(node)
@@ -163,16 +193,16 @@ function loadGraph(newGraph) {
 
 
   canvas.ondblclick = resetAllNodes
-  window.onkeyup = (e) => {
-        if (e.key === 'l' || e.key === 'k')
-          {
-            rendererSettings.renderLinks = !rendererSettings.renderLinks
+  // window.onkeyup = (e) => {
+  //       if (e.key === 'l' || e.key === 'k')
+  //         {
+  //           rendererSettings.renderLinks = !rendererSettings.renderLinks
 
-            let selector = e.key === 'l' ? 'mostSimilar' : 'leastSimilar';
-            traverseLinks(graph).forEach( (l) => highlightLink(l, rendererSettings.renderLinks && l.data[selector]))
-            renderer.rerender()
-          }
-      }
+  //           let selector = e.key === 'l' ? 'mostSimilar' : 'leastSimilar';
+  //           traverseLinks(graph).forEach( (l) => highlightLink(l, rendererSettings.renderLinks && l.data[selector]))
+  //           renderer.rerender()
+  //         }
+  //     }
   canvas.onwheel = function (e) {
       let mZoom = mapbox.getZoom()
 
@@ -277,11 +307,11 @@ function clearHighlightedElements(nhood)
 
 function highlightNeighborhood(node)
 {
-  var nhood = getNeighborhood(graph, node)
+  var nhood = getNeighborhood(graph, node, rendererSettings.layoutType)
 
   nhood.nodes.forEach(n => highlightNode(n, true))
   nhood.links.forEach(l => highlightLink(l, true))
-  rendererSettings.renderLinks = nhood.links.length > 0
+  rendererSettings.renderLinks = nhood.links.size > 0
 
   return nhood
 }
@@ -533,7 +563,7 @@ function springWeight(l, s, lType)
 
 function toggleLayout(lType)
 {
-
+  rendererSettings.layoutType = lType
   //dispose of any forceDirLayout if we already have one
   if(rendererSettings.forceDirLayout)
   {

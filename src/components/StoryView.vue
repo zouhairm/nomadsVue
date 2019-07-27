@@ -24,7 +24,7 @@
     <div class="ac-related" v-if='pars.showdetails'>
       Related Stories: 
       <ul style="margin-top: 3px">
-        <li>
+        <!-- <li>
           <div class="ac-most" @click.prevent='goToNode(mostSimilarOutNode)'>{{nodeTitle(mostSimilarOutNode)}}</div>
           <small>
             <em v-if="mostSimilarInNode == mostSimilarOutNode"> (Most Similar - bidirectional)</em>
@@ -36,17 +36,27 @@
         <li v-if="mostSimilarInNode != null && mostSimilarInNode != mostSimilarOutNode">
           <div class="ac-most" @click.prevent='goToNode(mostSimilarInNode)'>{{nodeTitle(mostSimilarInNode)}}</div>
           <small><em> (MostSimilar - inbound)</em></small>
+        </li> -->
+
+        <li v-for="n in mostSimilarNodes" :key="n.id">
+          <div class="ac-most" @click.prevent='goToNode(n)'>{{nodeTitle(n)}}</div>
+          <!-- <small><em> (Related)</em></small> -->
         </li>
 
         <li v-for="n in otherRelatedNodes" :key="n.id">
           <div class="ac-other" @click.prevent='goToNode(n)'>{{nodeTitle(n)}}</div>
-          <!-- <small><em> (Similar)</em></small> -->
+          <!-- <small><em> (Related)</em></small> -->
         </li>
 
-        <li>
+        <li v-for="n in leastSimilarNodes" :key="n.id">
+          <div class="ac-least" @click.prevent='goToNode(n)'>{{nodeTitle(n)}}</div>
+          <!-- <small><em> (Related)</em></small> -->
+        </li>
+
+<!--         <li>
           <div class="ac-least" @click.prevent='goToNode(leastSimilarOutNode)'>{{nodeTitle(leastSimilarOutNode)}}</div>
           <small><em> (Least Similar)</em></small>
-        </li>
+        </li> -->
 
       </ul>
     </div>
@@ -61,16 +71,16 @@
 import bus from '../lib/bus';
 import jsyaml from 'js-yaml';
 import axios from 'axios';
+import {getNeighborhood} from '../lib/createScene'
 
 export default {
 	name: 'StoryView',
 	props: ['pars'],
 	data() {
 		return {
-      mostSimilarOutNode: null,
-      mostSimilarInNode: null,
-      leastSimilarOutNode: null,
-      otherRelatedNodes: [],
+      mostSimilarNodes  : [],
+      leastSimilarNodes : [],
+      otherRelatedNodes : [],
       graph: null,
       storyText: '',
 		};
@@ -98,42 +108,29 @@ export default {
         //we are going to extract the most/least similar nodes
 
         //start by assuming they are null
-        this.mostSimilarInNode  = null
-        this.mostSimilarOutNode   = null
-        this.leastSimilarOutNode  = null
+        this.mostSimilarNodes  = []
+        this.leastSimilarNodes = []
         this.otherRelatedNodes = []
 
         //if new node and graph are defined,
         if (pars.node && this.$parent.graph) {
-          //iterate over the node links and get the nodes
-          for(let i = 0; i < pars.node.links.length; ++i)
+          let nhood = getNeighborhood(this.$parent.graph, pars.node, this.$parent.scene.rendererSettings.layoutType)
+          // if(this.$parent.scene.rendererSettings.layoutType == 'geo')
           {
-            let l = pars.node.links[i]
-
-            //If this is an inbound link
-            if (l.fromId != pars.node.id)
-            {
-              //only save it if this is the most similar InNode
-              if ('mostSimilar' in l.data)
-              {
-                this.mostSimilarInNode = this.$parent.graph.getNode(l.fromId)
+            nhood.nodes.forEach(n => {
+              let l = this.$parent.graph.getLink(pars.node.id, n.id)
+              if(!l) l = this.$parent.graph.getLink(n.id, pars.node.id)
+              if(this.$parent.scene.rendererSettings.layoutType == 'mostSimilar' || 
+                (l && l.data.mostSimilar)){
+                this.mostSimilarNodes.push(n)
+              } else if (this.$parent.scene.rendererSettings.layoutType == 'leastSimilar' || 
+                        (l && l.data.leastSimilar)) {
+                this.leastSimilarNodes.push(n)
+              } else {
+                this.otherRelatedNodes.push(n)
               }
-            }
-            //otherwise, this is an outbound link,
-            //save all of them
-            else if ('mostSimilar' in l.data)
-            {
-              this.mostSimilarOutNode = this.$parent.graph.getNode(l.toId)
-            }
-            else if ('leastSimilar' in l.data)
-            {
-              this.leastSimilarOutNode = this.$parent.graph.getNode(l.toId)
-            }
-            else
-            {
-              this.otherRelatedNodes.push(this.$parent.graph.getNode(l.toId))
-            }
-          }//endfor
+            })
+          }//end layout if case 
         }//endif
       }//end handler
     }//end pars
@@ -236,18 +233,20 @@ function getStoryFullText(node_id, year)
 }
 
 .ac-other,
-.ac-most
-
+.ac-most,
+.ac-least
 {
   cursor: pointer;
   color: blue;
   display: inline;
 }
+.ac-other
+{
+  color: gray;
+}
 .ac-least
 {
-  cursor: pointer;
   color: red;
-  display: inline;
 }
 
 .ac-storytext{

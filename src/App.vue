@@ -68,13 +68,12 @@ export default {
     
     return {
       scene: null,
-      showAbout: false,
-      showFilter: false,
+      showAbout: true,
+      showFilter: true,
       graph: null,
       mapbox: null,
       storyViewPars: { node: null, showdetails: false},
       year: '2019',
-      layoutType: 'geo', 
     };
   },
 
