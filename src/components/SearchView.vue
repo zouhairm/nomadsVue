@@ -10,10 +10,8 @@
               @blur="unfocusTimeout"
         type="text" class="form-control no-shadow" placeholder="Search Stories" />
 
-        <div class="input-group-btn" style="display: inline">
-            <button style="height: 26px;" class="btn" tabindex="-1" type="button"><fa-icon :icon="[ 'fas', 'search' ]"/>
-            </button>
-        </div>
+        <fa-icon class="btn" tabindex="-1" type="button" :icon="[ 'fas', 'search' ]"/>
+
       </div>
     </form>
 
@@ -107,7 +105,7 @@ function getAllMatches(graph, pattern) {
   var allMatches = [];
   var matcher = compileMatcher(pattern);
   graph.forEachNode(function(node) {
-    if (matcher.isMatch(node.data) && allMatches.length < 10) 
+    if (matcher.isMatch(node.data) && allMatches.length < 50) 
       allMatches.push(node);
   });
 
@@ -151,27 +149,44 @@ function compileRegex(pattern) {
 
 .search {
   position: absolute;
-  top: 2vh;
-  right: 3vw;
-  width: 25vw;
+  top: 1vh;
+  right: 5px;
   z-index: 1;
 }
+
+.search-form input {
+  width: 20vw;
+  background: rgba(26, 26, 26, 0.5);
+  color: white;
+  border-radius: 0;
+  border: 0;
+  line-height: 25px;
+  font-size: 14pt;
+  padding-left: 5px;
+}
+
+.search-form .input-group .btn {
+  color: gray;
+  margin-left: -20px;
+  display: inline;
+}
+
 .search .search-results {
   padding-top: 5px;
-  background: rgba(255, 255, 255, 0.8);
-  width: 25vw;
-  max-width: 25vw;
+  /*background: rgba(255, 255, 255, 0.8);*/
+  max-width: 20vw;
   max-height: 30vh;
 }
 
 .search .scroll-wrapper {
   border-top: 1px solid #808080;
   height: 250px;
-  background: rgba(255, 255, 255, 0.8);
+  /*background: rgba(255, 255, 255, 0.8);*/
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
   max-height: 96vh;
   max-width: 25vw;
-  overflow-y: auto;
+  overflow-y: scroll;
+  text-overflow: ellipsis;
 }
 
 .scroll-wrapper ul {
@@ -183,7 +198,7 @@ function compileRegex(pattern) {
   margin: 0;
   box-sizing: content-box;
   padding-top: 0px;
-  padding-right: 20px;
+  padding-right: 10px;
   padding-bottom: 0;
   padding-left: 0;
 }
@@ -201,7 +216,7 @@ function compileRegex(pattern) {
   /*display: block;*/
   margin: 0;
   padding: 0;
-  padding-left: 20px;
+  padding-left: 5px;
   line-height: 25px;
   white-space: nowrap;
   &:hover,
@@ -211,37 +226,6 @@ function compileRegex(pattern) {
     background:rgba(26, 26, 26, 0.95);
   }
 }
-
-.search-form input {
-    width: 21vw;
-    background: rgba(26, 26, 26, 0.5);
-    color: white;
-    border-radius: 0;
-    border: 0;
-    line-height: 25px;
-    font-size: 14pt;
-  };
-.search-form .input-group {
-  display: inline-flex;
-  border: 1px solid #808080;
-  &:hover,
-  &.focused {
-    border-color: white;
-    button.btn {
-      background: #66afe9;
-    }
-  }
-};
-
-/*
-For some reason this is not working ...
-.search-form .input-group .input-group-btn {
-  color: white;
-  border-radius: 0;
-  height: 25px;
-  display: inline;
-}*/
-
 
 
 
