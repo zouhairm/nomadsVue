@@ -7,7 +7,9 @@
                           <label>2018</label>
       <input type="radio" value="2019" v-model="selectedYear">
                           <label>2019</label>
+    <fa-icon class='close-filter' @click.prevent='showFilter = false' :icon="[ 'fas', 'window-close' ]"/>
     </div>
+
     <div class="f-geo">
       Layout Clustering: 
       <input type="radio" value="geo" v-model="selectedLayout">
@@ -17,8 +19,6 @@
       <input type="radio" value="leastSimilar" v-model="selectedLayout">
                           <label>Disimilar</label>
     </div>
-
-    <a href='#' @click.prevent='showFilter = false'  class='close-filter' title='Close'>[x]</a>
   </div>
 </template>
 
@@ -67,7 +67,7 @@ export default {
     },
     show: {
       handler (new_val, _oldpars) {  /* eslint-disable-line no-unused-vars */
-        this.showFilter = new_val
+        this.showFilter = !this.showFilter
       }//end handler
     }//end pars
   },//end watch
@@ -87,31 +87,37 @@ export default {
 .filter-box {
   position: absolute;
   right: 8px;
-  padding: 14px;
-  bottom: 40px;
-  width: 420px;
-  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 4px;
+  bottom: 9px;
+  background: rgba(150, 150, 150, 0.9);
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
 
   max-height: 88vh;
   overflow-y: scroll;
-  border-radius: 2%;
-  z-index: 1;
+  border-radius: 1%;
+  z-index: 2;
 }
 
-.f-year input { 
-  margin: 10px;
+.f-geo, .f-year {
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
+
+.f-year input, 
 .f-geo input {
-  margin: 10px;
+  margin: 5px;
+  margin-top: -1px;
+  vertical-align: middle;
 }
 
 .close-filter {
   float: right;
-  margin-right: 14px;
+  margin: 0px;
+  padding: 0px;
   font-size: 12px;
   font-weight: bold;
-  color: blue;
+  color: rgba(200, 200, 200);
+  cursor: pointer;
 }
 
 </style>

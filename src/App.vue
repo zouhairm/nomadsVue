@@ -9,6 +9,7 @@
     <search-view id='search'></search-view>
 
     <div id='about' class='about-box' v-if='showAbout'>
+        <fa-icon class='close-about' @click.prevent='showAbout = false' :icon="[ 'fas', 'window-close' ]"/>
         <h2>About Project</h2>
         <div style='text-align: left'>
             <p>A Factual Intro (narrative to come ...)</p>
@@ -29,7 +30,7 @@
         </ul>
         <p>For technical details, check out this <a target="_blank" href="https://zouhairm.github.io/writerBlock">Blog Post</a></p>
         </div>
-        <a href='#' @click.prevent='showAbout = false'  class='close-about' title='Close this message'>Close</a>
+        <!-- <a href='#' @click.prevent='showAbout = false'  class='close-about' title='Close this message'>Close</a> -->
     </div>
 
     <filter-view id='filter' :show='showFilter'> </filter-view>
@@ -257,7 +258,6 @@ a {
 
   padding: 10px;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 1%;
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
   z-index: 1;
 
@@ -283,10 +283,11 @@ a {
 
 .close-about {
   float: right;
-  margin-right: 14px;
+  margin: 0px;
   font-size: 12px;
   font-weight: bold;
-  color: blue;
+  cursor: pointer;
+  color: rgb(100,100,100);
 }
 
 </style>
