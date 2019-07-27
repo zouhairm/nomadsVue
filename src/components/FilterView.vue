@@ -53,7 +53,7 @@ export default {
     {
       handler (new_year, old_year) { 
         if(new_year != old_year){
-          getGraph(new_year);
+          getGraph(this.$parent.mapbox, new_year);
         }
       }//end handler
     },

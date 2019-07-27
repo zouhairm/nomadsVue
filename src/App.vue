@@ -1,7 +1,32 @@
 <template>
   <div id="app">
+          <!-- Set the display of this container to none so we can
+         add it programmatically to `legendControl` -->
+
+    <div class='legend' v-show='!showAbout'>
+      <div class="country">
+        <h4>Author Country:</h4>
+        <div><span style='background-color: #ffaa00'></span>Africa</div>
+        <div><span style='background-color: #fffb00'></span>Asia</div>
+        <div><span style='background-color: #0062ff'></span>Europe</div>
+        <div><span style='background-color: #37ff00'></span>N. America</div>
+        <div><span style='background-color: #fb00ff'></span>S. America</div>
+        <div><span style='background-color: #ff0015'></span>Oceania</div>
+      </div>
+
+      <div class="links">
+        <h4>Story Similarity:</h4>
+        <div><span style="color:#4949ff; ">&#8211;</span>Most</div>
+        <div><span style="color:gray;">&#8211;</span>Somewhat</div>
+        <div><span style="color:red; ">&#8211;</span>Least</div>
+      </div> 
+    </div>
+
     <div id="mapCanvas"></div>
     <div id="cnv"></div>
+
+
+
 
 
     <story-view id='story' :pars='storyViewPars'  v-if='showStory'> </story-view>
@@ -109,7 +134,7 @@ export default {
 
     //Token restricted to zouhairm.github.io/nomadsVue - please don't steal :p
     mapboxgl.accessToken = 'pk.eyJ1Ijoiem9vaGFpciIsImEiOiJjanlmMWRzenExN2N4M2xzOGVvdDg2eG9jIn0.HX4LVDqBgxUKivoqPLk_4w'
-
+    
     this.mapbox = new mapboxgl.Map({
       container: 'mapCanvas',
       style: 'mapbox://styles/mapbox/dark-v9',
@@ -121,7 +146,6 @@ export default {
     this.mapbox.scrollZoom.disable()
     this.mapbox.dragPan.disable()
 
-    window.mapbox = this.mapbox
 
 
     const canvas = document.getElementById('cnv');
@@ -289,5 +313,45 @@ a {
   cursor: pointer;
   color: rgb(100,100,100);
 }
+
+.legend {
+  z-index: 1;
+  /*background-color: rgb(100,100,100, 0.05);*/
+  color: gray;
+  /*box-shadow: 0 1px 2px rgba(0,0,0,0.10);*/
+  font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  position: absolute;
+  display: inline-grid;
+
+  margin: auto;
+  right: 0px;
+  left: 0px;
+  top: 5px;
+  max-width: 35vw;
+  height: 6vh;
+}
+
+.legend .country,
+.legend .links{
+  display: inline-flex;
+}
+ 
+.legend h4 {
+  margin: 0 5px 5px;
+}
+ 
+.legend div span {
+  border-radius: 50%;
+  display: inline-block;
+  height: 5px;
+  width: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.legend .links div span {
+  -webkit-text-stroke-width:4px;
+}
+
 
 </style>

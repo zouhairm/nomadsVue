@@ -10,20 +10,20 @@ import bus from './bus';
 import {LngLat} from 'mapbox-gl'
 
 /* MUSTDO: make the file smaller ... */
-export function getGraph(year = '2019' ) {
+export function getGraph(map, year = '2019') {
   let jsonGraphFileURL = `./Stories_viva_${year}.json`
   return axios.get(jsonGraphFileURL)
     .then( 
       response => {
-        let g = tryJson(response.data);
+        let g = tryJson(map, response.data);
         bus.fire('load-graph', g, year);
   });
   //TODO: add catch handling of error ...
 }
 
-function tryJson(jsonContent) {
+function tryJson(map, jsonContent) {
   try {
-     computePositions(jsonContent)
+     computePositions(map, jsonContent)
      return fromJson(jsonContent)
   } catch (e) {
     //eslint-disable-next-line
@@ -32,21 +32,19 @@ function tryJson(jsonContent) {
 
 }
 
-function projection(latlon)
+function projection(map, latlon)
 {
-
-
-  var p = window.mapbox.project(new LngLat(latlon['lon'], latlon['lat']))
+  var p = map.project(new LngLat(latlon['lon'], latlon['lat']))
   return p;
 }
 
-function computePositions(jsonContent)
+function computePositions(map, jsonContent)
 {
   const R0 = .1, dR = .1/3;
   const dTheta_at_R1 = 2 * Math.PI / 10 /2 ;
 
   for (const [country, latlon] of Object.entries(jsonContent.metadata.countryPositions)) {
-    jsonContent.metadata.countryPositions[country].xypos = projection(latlon)
+    jsonContent.metadata.countryPositions[country].xypos = projection(map, latlon)
     jsonContent.metadata.countryPositions[country].theta = 0
     jsonContent.metadata.countryPositions[country].R = R0
 

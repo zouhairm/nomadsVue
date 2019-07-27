@@ -55,12 +55,11 @@ export function getNeighborhood(graph, node, lType = 'geo', collector = undefine
 
 
 
-export function createScene(canvas, _mapbox = null) {
+export function createScene(canvas, _mapbox) {
 // Since graph can be loaded dynamically, we have these uninitialized
 // and captured into closure. loadGraph will do the initialization
-let graph, renderer, layout, graphics, rendererSettings, mapbox;
-
-mapbox = _mapbox;
+let graph, renderer, layout, graphics, rendererSettings;
+let mapbox = _mapbox;
 let highlightedElements = {nodes: [], links: [], sticky: false}
 
 //Save where the graph will be rendered
@@ -78,7 +77,7 @@ bus.on('emulate-node-hover', hoverHandler)
 
 //First time creating scene, use getGraph() with default
 //parameters. getGraph will fire load-graph ...
-getGraph()
+getGraph(mapbox)
 
 //the scene we return has the following member functions
 return {
