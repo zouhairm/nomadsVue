@@ -7,7 +7,7 @@
                           <label>2018</label>
       <input type="radio" value="2019" v-model="selectedYear">
                           <label>2019</label>
-    <fa-icon class='close-filter' @click.prevent='showFilter = false' :icon="[ 'fas', 'window-close' ]"/>
+    <fa-icon class='close-filter' @click.prevent='closeShow()' :icon="[ 'fas', 'window-close' ]"/>
     </div>
 
     <div class="f-geo">
@@ -30,12 +30,11 @@ import {getGraph} from '../lib/getGraph';
 
 export default {
   name: 'FilterView',
-  props: ['show'],
+  // props: ['show'],
   data() {
     return {
       selectedYear: '2019',
       selectedLayout: 'geo',
-      showFilter: true,
       leastSimilarNode: null,
       otherRelatedNodes: [],
       graph: null,
@@ -48,6 +47,16 @@ export default {
     bus.on('load-graph', () => {this.selectedLayout = 'geo'})
   },
 
+  computed:{
+    showFilter() {
+      return this.$parent.showFilter
+    }
+  },
+  methods:{
+    closeShow(){
+      this.$parent.showFilter = false;
+    }
+  },
   watch: {
     selectedYear:
     {
@@ -66,9 +75,9 @@ export default {
       }
     },
     show: {
-      handler (new_val, _oldpars) {  /* eslint-disable-line no-unused-vars */
-        this.showFilter = !this.showFilter
-      }//end handler
+      // handler (new_val, _oldpars) {   eslint-disable-line no-unused-vars 
+      //   this.showFilter = new_val
+      // }//end handler
     }//end pars
   },//end watch
 }
@@ -97,6 +106,17 @@ export default {
   border-radius: 1%;
   z-index: 2;
 }
+
+@media all and (min-width:0px) and (max-width: 640px) {
+  .filter-box{
+    font: 9px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+/*    max-width: unset;
+    max-height: 1vh;
+    right: unset;*/
+    line-height: 5px;
+  }
+}
+
 
 .f-geo, .f-year {
   margin-top: 2px;

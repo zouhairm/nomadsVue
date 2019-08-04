@@ -202,6 +202,11 @@ function loadGraph(newGraph) {
   //           renderer.rerender()
   //         }
   //     }
+
+
+
+
+
   canvas.onwheel = function (e) {
       let mZoom = mapbox.getZoom()
 
@@ -230,8 +235,8 @@ function loadGraph(newGraph) {
 
       renderer.rerender()
       setTimeout(function() {renderer.rerender()}, 200);
-      
   }
+
   //******************************************
   //*************** Renderer *****************
   //******************************************
@@ -246,9 +251,11 @@ function loadGraph(newGraph) {
   }
 
   if(renderer)
-  {
+  {    
     renderer.run();
     fitAndCenter();
+
+    renderer.on("scroll", (scale, offset) => canvas.onwheel({wheelDelta: scale, pageX: offset.x, pageY: offset.y}))
   }
 
   //saving these for debugging

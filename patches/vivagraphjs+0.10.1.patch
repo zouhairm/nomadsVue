@@ -1,3 +1,19 @@
+diff --git a/node_modules/vivagraphjs/src/View/renderer.js b/node_modules/vivagraphjs/src/View/renderer.js
+index a73fab9..2602cb6 100644
+--- a/node_modules/vivagraphjs/src/View/renderer.js
++++ b/node_modules/vivagraphjs/src/View/renderer.js
+@@ -451,6 +451,11 @@ function renderer(graph, settings) {
+       }
+       containerDrag.onScroll(function(e, scaleOffset, scrollPoint) {
+         scale(scaleOffset < 0, scrollPoint);
++        publicEvents.fire('scroll', scaleOffset, scrollPoint)
++      });
++    } else if(containerDrag) {
++      containerDrag.onScroll(function(e, scaleOffset, scrollPoint) {
++        publicEvents.fire('scroll', scaleOffset, scrollPoint)
+       });
+     }
+ 
 diff --git a/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js b/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js
 index a4654f1..0a516ba 100644
 --- a/node_modules/vivagraphjs/src/WebGL/webglInputEvents.js

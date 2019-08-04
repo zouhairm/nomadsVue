@@ -31,10 +31,10 @@
 
     <story-view id='story' :pars='storyViewPars'  v-if='showStory'> </story-view>
 
-    <search-view id='search'></search-view>
+    <search-view id='search' v-if='!isMobile()'></search-view>
 
     <div id='about' class='about-box' v-if='showAbout'>
-        <fa-icon class='close-about' @click.prevent='showAbout = false' :icon="[ 'fas', 'window-close' ]"/>
+        <fa-icon class='close-about' @click.prevent='closeAbout()' :icon="[ 'fas', 'window-close' ]"/>
         <h2>About <em>Nomads' Vue</em></h2>
         <div style='text-align: left'>
         <p>
@@ -73,15 +73,15 @@
         <!-- <a href='#' @click.prevent='showAbout = false'  class='close-about' title='Close this message'>Close</a> -->
     </div>
 
-    <filter-view id='filter' :show='showFilter'> </filter-view>
+    <filter-view id='filter'> </filter-view>
 
     <div class='footer'>
-        <a @click.prevent='showAbout = !showAbout' class='about-link'>About</a>
+        <a @click.prevent='toggleAbout()' class='about-link'>About</a>
         <p class='copyText'>
             Made during late night hours by <a target="_blank" href="https://zouhairm.github.io/bio">Zouhair M</a>
         </p>
 
-        <a @click.prevent='showFilter = !showFilter' class='options-link'>Settings</a>
+        <a v-if='!showAbout' @click.prevent='showFilter = !showFilter && !showAbout' class='options-link'>Settings</a>
     </div>
 
 
@@ -110,7 +110,7 @@ export default {
     return {
       scene: null,
       showAbout: true,
-      showFilter: true,
+      showFilter: false,
       graph: null,
       mapbox: null,
       storyViewPars: { node: null, showdetails: false},
@@ -120,7 +120,17 @@ export default {
 
 
   methods: {
-
+    toggleAbout() {
+      this.showAbout = !this.showAbout;
+      this.showFilter = !this.showAbout
+    },
+    closeAbout() {
+      this.showAbout = false
+      this.showFilter = true
+    },
+    isMobile() {
+     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    }
   },
 
   computed:
@@ -244,6 +254,8 @@ body {
   top: 0;
   bottom: 0;
   background-color: #000000d9;
+  touch-action: none;
+
 
 /*  background: #000000d9 url('assets/world-map-equirectangular.png') no-repeat;
   background-attachment: fixed;
@@ -344,6 +356,16 @@ a {
   top: 5px;
   max-width: 35vw;
   height: 6vh;
+}
+
+@media all and (min-width:0px) and (max-width: 640px) {
+  .legend{
+    font: 9px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    max-width: unset;
+    max-height: 1vh;
+    right: unset;
+    line-height: 5px;
+  }
 }
 
 .legend .country,
