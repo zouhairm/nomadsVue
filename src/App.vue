@@ -35,25 +35,40 @@
 
     <div id='about' class='about-box' v-if='showAbout'>
         <fa-icon class='close-about' @click.prevent='showAbout = false' :icon="[ 'fas', 'window-close' ]"/>
-        <h2>About Project</h2>
+        <h2>About <em>Nomads' Vue</em></h2>
         <div style='text-align: left'>
-            <p>A Factual Intro (narrative to come ...)</p>
-            <p>This web site is intended to help explore travel stories by thousands of people that have been submitted to the Travel Nomad Contest.<br>
-            The stories are displayed geographically and their metadata (location, author, title) are searchable.
-            A NN (LSTM w/ Doc2Vec) was trained on the stories to find relations between them. When a story is selected, the 4-most similar as well as the least similar story to it are highlighted.<br><br>
+        <p>
+          <span style='font-weight: bold;'>Intro</span>
+          This project is intended to help explore travel stories by thousands of people that have been submitted to the Travel Nomad Contest.<br>
 
-            Hopefully this makes the submissions of these aspiring writers fun to explore.
-            Go Ahead - Explore the map, hover on stories, search for keywords, and enjoy reading the stories!<br>
-            P.S. If you get lost or the screen bugs up, just double click to reset!</p>
+          Hopefully this makes the submissions of these aspiring writers fun to explore, and that a wide audience of users finds it interesting; whether it be aspiring travel writers, daydreaming office workers thinking about exploring a new destination, or social scientists interested in understanding why and how people travel. In a time where it feels like differences between nations and their people are amplified, I hope this serves as reminder that so many of us are connected through the way we experience our planet and each other.
 
-        This is made possible thanks to the following packages/data
-        <ul>
-            <li><a target="_blank" href="https://www.worldnomads.com/create/scholarships/writing/2018/results">Travel Nomad Stories</a></li>
-            <li><a target="_blank" href="https://radimrehurek.com/gensim/models/doc2vec.html">GenSim (Doc2Vec)</a></li>
-            <li><a target="_blank" href="https://github.com/vuejs/awesome-vue">Vue.js</a></li>
-            <li><a target="_blank" href="https://github.com/anvaka/VivaGraphJS">VivaGraphJS (w/ WebGL renderer)</a><li><a target="_blank" href="https://www.mapbox.com/">Mapbox</a></li>
-        </ul>
-        <p>For technical details, check out this <a target="_blank" href="https://zouhairm.github.io/writerBlock">Blog Post</a></p>
+          <br><br>
+          <span style='font-weight: bold;'>How to Use</span>
+
+          When a story is hovered or selected, the story and its metadata (location, author, title) are displayed in a reading pane on the left. A Neural-Network model was trained on the stories to find relations between them, and similar as well as the least similar stories to the selected story that are identified by the model are highlighted and can be explored from the graph or the reading view.<br>
+
+          The stories are displayed geographically and color-coded by the continent origin of the author. It is also possible to cluster most similar or least similar stories together using the options popup in the bottom-right corner.
+
+          The stories' metadata are searchable using the top-right corner box.
+          <br><br>
+
+          Go Ahead - Explore the map, hover on stories, search for keywords, and enjoy reading the stories!<br>
+          If you get lost or the screen bugs up, <b>double click to reset</b>
+          <br><br> 
+
+          <span style='font-weight: bold;'>Credits</span>
+          This project is made possible thanks to the following packages and data:
+          <ul>
+              <li><a target="_blank" href="https://www.worldnomads.com/create/scholarships/writing/2018/results">Travel Nomad Stories</a></li>
+              <li><a target="_blank" href="https://radimrehurek.com/gensim/models/doc2vec.html">GenSim (Doc2Vec)</a></li>
+              <li><a target="_blank" href="https://github.com/vuejs/awesome-vue">Vue.js</a></li>
+              <li><a target="_blank" href="https://github.com/anvaka/VivaGraphJS">VivaGraphJS (w/ WebGL renderer)</a><li><a target="_blank" href="https://www.mapbox.com/">Mapbox</a></li>
+          </ul>
+
+          For more background, insights, and technical details; check out my <a target="_blank" href="https://zouhairm.github.io/writerBlock">Blog Post</a>
+
+        </p>
         </div>
         <!-- <a href='#' @click.prevent='showAbout = false'  class='close-about' title='Close this message'>Close</a> -->
     </div>
