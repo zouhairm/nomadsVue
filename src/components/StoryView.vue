@@ -268,6 +268,12 @@ function getStoryFullText(node_id, year)
   background: rgba(150, 150, 150, 0.4);
 }
 
+@media all and (min-width:0px) and (max-width: 640px) {
+  .ac-storytext {
+    max-height: 80vw;
+  }
+}
+
 
 .close-box {
   position: sticky;
