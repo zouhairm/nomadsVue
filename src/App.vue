@@ -333,12 +333,15 @@ a {
 }
 
 .close-about {
+  position: sticky;
+  top: 0;
   float: right;
   margin: 0px;
-  font-size: 12px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   color: rgb(100,100,100);
+  z-index: 2;
 }
 
 .legend {
@@ -359,6 +362,9 @@ a {
 }
 
 @media all and (min-width:0px) and (max-width: 640px) {
+  .close-about {
+    font-size:25px;
+  }
   .legend{
     font: 9px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     max-width: unset;

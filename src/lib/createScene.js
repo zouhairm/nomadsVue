@@ -74,6 +74,7 @@ rendererSettings = {
 bus.on('load-graph', loadGraph);
 bus.on('emulate-node-click', clickHandler)
 bus.on('emulate-node-hover', hoverHandler)
+bus.on('resetview', resetAllNodes)
 
 //First time creating scene, use getGraph() with default
 //parameters. getGraph will fire load-graph ...
@@ -192,20 +193,14 @@ function loadGraph(newGraph) {
 
 
   canvas.ondblclick = resetAllNodes
-  // window.onkeyup = (e) => {
-  //       if (e.key === 'l' || e.key === 'k')
-  //         {
-  //           rendererSettings.renderLinks = !rendererSettings.renderLinks
 
-  //           let selector = e.key === 'l' ? 'mostSimilar' : 'leastSimilar';
-  //           traverseLinks(graph).forEach( (l) => highlightLink(l, rendererSettings.renderLinks && l.data[selector]))
-  //           renderer.rerender()
-  //         }
-  //     }
+  canvas.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length >= 1) {
+        let newEv = new MouseEvent('mouseup', e.changedTouches[0])
+        graphics.getGraphicsRoot().dispatchEvent(newEv);
+    }
 
-
-
-
+  })
 
   canvas.onwheel = function (e) {
       let mZoom = mapbox.getZoom()

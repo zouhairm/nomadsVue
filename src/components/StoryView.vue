@@ -1,6 +1,8 @@
 
 <template>
-	<div class='info-box'>
+	<div class='info-box' v-if='showbox' >
+    <fa-icon class='close-box' @click.prevent='closebox()' :icon="[ 'fas', 'window-close' ]"/>
+
 		<div class="ac-header">
       {{nodeMetaData.label}}
       <br>
@@ -78,6 +80,7 @@ export default {
 	props: ['pars'],
 	data() {
 		return {
+      showbox: false,
       mostSimilarNodes  : [],
       leastSimilarNodes : [],
       otherRelatedNodes : [],
@@ -96,6 +99,7 @@ export default {
         this.storyText = 'No story selected ...'
         if(pars.node)
         {
+          this.showbox = true
           this.storyText = pars.node.data.Excerpt;
           if (pars.showdetails){
             // TODO: actually fetch the story details and show them
@@ -152,9 +156,13 @@ export default {
       }
     },
 
-    nodeTitle(node)
-    {
+    nodeTitle(node) {
       return node ? node.data.label : 'None?'
+    },
+
+    closebox(){
+      this.showbox = false;
+      bus.fire('resetview')
     }
   },
 
@@ -203,6 +211,7 @@ function getStoryFullText(node_id, year)
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
 
   max-height: 88vh;
+  max-width: 95vw;
   overflow-y: scroll;
   border-radius: 2%;
   z-index: 1;
@@ -257,7 +266,19 @@ function getStoryFullText(node_id, year)
   overflow-y: scroll;
 
   background: rgba(150, 150, 150, 0.4);
+}
 
+
+.close-box {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 0px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  color: rgb(100,100,100);
+  z-index: 2;
 }
 
 </style>
