@@ -255,12 +255,6 @@ body {
   bottom: 0;
   background-color: #000000d9;
   touch-action: none;
-
-
-/*  background: #000000d9 url('assets/world-map-equirectangular.png') no-repeat;
-  background-attachment: fixed;
-  background-position: 0px 0px;
-  /*background-width: 100vw;*/
 }
 canvas{ position: relative; z-index: 1 }
 
