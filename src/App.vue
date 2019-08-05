@@ -122,11 +122,11 @@ export default {
   methods: {
     toggleAbout() {
       this.showAbout = !this.showAbout;
-      this.showFilter = !this.showAbout
+      this.showFilter = !this.showAbout && !this.isMobile()
     },
     closeAbout() {
       this.showAbout = false
-      this.showFilter = true
+      this.showFilter = !this.isMobile()
     },
     isMobile() {
      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)

@@ -270,7 +270,7 @@ function getStoryFullText(node_id, year)
 
 @media all and (min-width:0px) and (max-width: 640px) {
   .ac-storytext {
-    max-height: 80vw;
+    max-height: 85vw;
   }
 }
 
