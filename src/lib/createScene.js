@@ -408,16 +408,13 @@ function fitAndCenter(rerender = true, desiredZoom = 1){
     desiredZoom = screenSize / graphSize * 0.8;
   }
 
-  // zoomToOneShot(desiredZoom);
-  zoomTo(desiredZoom, renderer.getTransform().scale,
-        () => renderer.moveTo(midPoint.x, midPoint.y) //move once zooming is done with..
-        )
-
-
-  if(rerender) {
-    renderer.rerender()
-    setTimeout(function() {renderer.rerender()}, 200);
+  var cbAtEndOfZoom = () =>
+  {
+    renderer.moveTo(midPoint.x, midPoint.y) //move once zooming is done with..
+    if(rerender) {renderer.rerender(); setTimeout(function() {renderer.rerender()}, 200);}
   }
+  zoomTo(desiredZoom, renderer.getTransform().scale, cbAtEndOfZoom)
+
 }
 
 // function zoomToOneShot(desiredScale, zPoint)
@@ -452,9 +449,7 @@ function zoomTo(desiredScale, currentScale, cb = null) {
     //Recurse if we are not yet at the right scale!
     if(Math.abs(desiredScale - newScale) > Math.abs(currentScale - newScale)/2)
     {
-        setTimeout(function() {
-            zoomTo(desiredScale, newScale, cb);
-        }, 16);
+        setTimeout(() => zoomTo(desiredScale, newScale, cb), 20);
     } else if(cb != null){
       cb();
     }
