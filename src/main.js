@@ -9,7 +9,6 @@ Vue.use(VueAnalytics, {
   debug: { sendHitTask: process.env.NODE_ENV === 'production'}
 })
 
-
 //1st, configure font-awesome
 import { library } from '@fortawesome/fontawesome-svg-core' //get library and add icons of interest
 import { fas } from '@fortawesome/free-solid-svg-icons'; //we want the free icons

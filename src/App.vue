@@ -157,6 +157,8 @@ export default {
   },
   mounted() {
 
+    this.$ga.page(window.location.pathname)
+
     //Token restricted to zouhairm.github.io/nomadsVue - please don't steal :p
     mapboxgl.accessToken = 'pk.eyJ1Ijoiem9vaGFpciIsImEiOiJjanlmMWRzenExN2N4M2xzOGVvdDg2eG9jIn0.HX4LVDqBgxUKivoqPLk_4w'
     
