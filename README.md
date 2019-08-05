@@ -9,11 +9,11 @@ For more background, insights, and technical details; check out this [Blog Post]
 
 This project is made possible thanks to the following packages and data:
 
-* [Travel Nomad Stories](https://www.worldnomads.com/create/scholarships/writing/2018/results){:target="_blank"}
-* [GenSim (Doc2Vec)](https://radimrehurek.com/gensim/models/doc2vec.html){:target="_blank"}
-* [Vue.js](https://github.com/vuejs/awesome-vue){:target="_blank"}
-* [VivaGraphJS (w/ WebGL renderer)](https://github.com/anvaka/VivaGraphJS){:target="_blank"}
-* [Mapbox](https://www.mapbox.com/){:target="&#95;blank"}
+* [Travel Nomad Stories](https://www.worldnomads.com/create/scholarships/writing/2018/results)
+* [GenSim (Doc2Vec)](https://radimrehurek.com/gensim/models/doc2vec.html)
+* [Vue.js](https://github.com/vuejs/awesome-vue)
+* [VivaGraphJS (w/ WebGL renderer)](https://github.com/anvaka/VivaGraphJS)
+* [Mapbox](https://www.mapbox.com/)
 
 
 # Scraping
