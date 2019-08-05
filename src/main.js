@@ -4,7 +4,9 @@ import App from './App.vue'
 
 import VueAnalytics from 'vue-analytics'
 Vue.use(VueAnalytics, {
-  id: 'UA-144701829-1'
+  id: 'UA-144701829-1',
+  autoTracking: {screenview: true},
+  debug: { sendHitTask: process.env.NODE_ENV === 'production'}
 })
 
 
