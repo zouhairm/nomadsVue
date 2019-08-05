@@ -311,8 +311,24 @@ a {
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
   z-index: 1;
-
 }
+@media all and (min-width:0px) and (max-width: 640px) {
+.about-box {
+  position: absolute;
+  left: 8px;
+  padding: 14px;
+  top: 2vh;
+  width: 420px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0 rgba(0,0,0,.02);
+  max-height: 88vh;
+  max-width: 95vw;
+  overflow-y: scroll;
+  border-radius: 2%;
+  z-index: 1;
+  }
+}
+
 .about-link {
   background: rgba(0, 120, 120, 0.4);
   padding: 5px 10px;
