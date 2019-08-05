@@ -4,8 +4,7 @@ import App from './App.vue'
 
 import VueAnalytics from 'vue-analytics'
 Vue.use(VueAnalytics, {
-  id: 'UA-144701829-1',
-  debug: { sendHitTask: process.env.NODE_ENV === 'production'}
+  id: 'UA-144701829-1'
 })
 
 
