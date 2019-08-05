@@ -1,42 +1,38 @@
+# Intro & Motivation
+ This project is intended to help explore travel stories by thousands of people that have been submitted to the Travel Nomad Contest.
+
+Hopefully this makes the submissions of these aspiring writers fun to explore, and that a wide audience of users finds it interesting; whether it be aspiring travel writers, daydreaming office workers thinking about exploring a new destination, or social scientists interested in understanding why and how people travel.
+
+In a time where it feels like differences between nations and their people are amplified, I hope this serves as reminder that so many of us are connected through the way we experience our planet and each other.
+
+For more background, insights, and technical details; check out this [Blog Post](https://zouhairm.github.io/writerBlock)
+
+This project is made possible thanks to the following packages and data:
+
+* [Travel Nomad Stories](https://www.worldnomads.com/create/scholarships/writing/2018/results){:target="_blank"}
+* [GenSim (Doc2Vec)](https://radimrehurek.com/gensim/models/doc2vec.html){:target="_blank"}
+* [Vue.js](https://github.com/vuejs/awesome-vue){:target="_blank"}
+* [VivaGraphJS (w/ WebGL renderer)](https://github.com/anvaka/VivaGraphJS){:target="_blank"}
+* [Mapbox](https://www.mapbox.com/){:target="&#95;blank"}
+
+
 # Scraping
 Files are obtained from the submissions of writers to the travel nomad website
-Code is inside the ./scraper folder.
+Code is inside the `./scraper` folder.
 Took about ~4 hours of coding and ~24 hrs to download (slow connection while travelling in Sri Lanka :p)
 
 
 # NLP
-
-still work in progress ... for now, using doc2vec 
-
-* Build a classifier and a way to explore the corpus of stories. Perhaps associate each cluster with some images (pulled from Web?)
-* Come up with one sentence summaries for each of the stories? Is there such a thing as an SVD for doc2Vec?
-
-other options (might require more of a server side)
-* Generate new stories based on a "seed" sentence?
+still work in progress ... for now, using doc2vec. Details in `story2Vec` folder.
 
 # Visualizing
-Also work in progress. Experimenting with Cytoscape. Some ideas:
-
-* Allow easy exploring of stories - filter by author country, set in country, topic, etc.
-* Make it possible to find "most similar story" or "least similar story". Maybe this is visualized by edges somehow?
-
+After experimenting with Cytoscape, settled on VivaGraphJS. 
 
 # Running locally
-cd storiesViz
-python -m http.server
+```
+npm install
+npm run serve
+```
 
 # Deploying
-Host the storiesViz folder on a webserver (AWS, GCloud, etc.)
-
-
-# Readings & References:
-
-https://www.datanovia.com/en/lessons/determining-the-optimal-number-of-clusters-3-must-know-methods/
-
-https://medium.com/@david.campion/text-generation-using-bidirectional-lstm-and-doc2vec-models-2-3-f0fc07ee7b30
-
-https://radimrehurek.com/gensim/
-
-[Distributed Representations of Sentences and Documents](https://arxiv.org/pdf/1405.4053.pdf)
-
-[An Empirical Evaluation of doc2vec with Practical Insights into Document Embedding Generation](https://www.aclweb.org/anthology/W16-1609)	
+The  script `./deploy.sh` runs `npm run build` and pushes the dist folder to github.
