@@ -118,20 +118,21 @@ export default {
 
         //if new node and graph are defined,
         if (pars.node && this.$parent.graph) {
-          let nhood = getNeighborhood(this.$parent.graph, pars.node, this.$parent.scene.rendererSettings.layoutType)
+          // let nhood = getNeighborhood(this.$parent.graph, pars.node, this.$parent.scene.rendererSettings.layoutType)
+          let nhood = getNeighborhood(this.$parent.graph, pars.node, 'geo')
           // if(this.$parent.scene.rendererSettings.layoutType == 'geo')
           {
             nhood.nodes.forEach(n => {
-              let l = this.$parent.graph.getLink(pars.node.id, n.id)
-              if(!l) l = this.$parent.graph.getLink(n.id, pars.node.id)
-              if(this.$parent.scene.rendererSettings.layoutType == 'mostSimilar' || 
-                (l && l.data.mostSimilar)){
-                this.mostSimilarNodes.push(n)
-              } else if (this.$parent.scene.rendererSettings.layoutType == 'leastSimilar' || 
-                        (l && l.data.leastSimilar)) {
-                this.leastSimilarNodes.push(n)
-              } else {
-                this.otherRelatedNodes.push(n)
+              if(pars.node.id != n.id){
+                let l = this.$parent.graph.getLink(pars.node.id, n.id)
+                if(!l) l = this.$parent.graph.getLink(n.id, pars.node.id)
+                if((l && l.data.mostSimilar)){
+                  this.mostSimilarNodes.push(n)
+                } else if ((l && l.data.leastSimilar)) {
+                  this.leastSimilarNodes.push(n)
+                } else {
+                  this.otherRelatedNodes.push(n)
+                }
               }
             })
           }//end layout if case 

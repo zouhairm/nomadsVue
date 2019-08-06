@@ -39,14 +39,16 @@ export function getNeighborhood(graph, node, lType = 'geo', collector = undefine
     })
     //Next, for each of these node Ids, if we haven't already traversed it,
     //we recurse to collect more stuff
+    var newNodesNotVisited = []
     newNodesIds.forEach(nodeId => 
     {
       let cNode = graph.getNode(nodeId)
       if(! neighbors.nodes.has(cNode)){
         neighbors.nodes.add(cNode)
-        getNeighborhood(graph, cNode, lType, neighbors)
+        newNodesNotVisited.push(cNode)
       }
     })
+    newNodesNotVisited.forEach(n => getNeighborhood(graph, n, lType, neighbors))
   }
   return neighbors
 }
@@ -291,6 +293,8 @@ function clickHandler(node)
 
   highlightedElements = highlightNeighborhood(node)
   highlightedElements.sticky = true
+  //1 instead of true will use special color for the node
+  highlightNode(node, 1) 
   renderer.rerender()
 
   bus.fire('node-clicked', node)
@@ -457,8 +461,10 @@ function zoomTo(desiredScale, currentScale, cb = null) {
 
 function getNodeSize(node, high)
 {
-  if (high)
-    return 2;
+  if (high === 1)
+    return 4;
+  else if (high)
+    return 3;
   else
     return 2;
 }
@@ -469,8 +475,13 @@ function getNodeColorAlpha(node, high)
                 'highlighted': 0xffffff, 'N/A': 0x7d7d7d}
 
 
-  return {color: colors[node.data.AuthorCont] || colors['N/A'], 
-          alpha: high ? .8: .5}
+  var cAlpha = {color: colors[node.data.AuthorCont] || colors['N/A'], 
+                alpha: high ? .9: .6}
+
+  if (high === 1){
+    cAlpha.color = 0xffffff
+  }
+  return cAlpha
 }
 function getLineColor(link)
 {
@@ -539,21 +550,20 @@ function springWeight(l, s, lType)
      } else { 
       s.length = l.data.d*50;   s.weight = 0.001;
     }
-    return
   }
-
-  //else == lType = leastSimilar
-  if(l.data.leastSimilar){
-    //we will see if this link is connected to a node
-    //that has at least a total of 3 dissimilar nodes
-    //otherwise we won't use it in the clustering
-    s.length = 5;
-    s.weight = isStronglyDisimilar(l, 3) ? 3.0 : 0.001;
-  } else if (l.data.mostSimilar) { 
-    s.length = l.data.d*1000; 
-    s.weight = 0.001;
-  } else { 
-    s.length = l.data.d*50;   s.weight = 0.001;
+  else{ // .e.lType == 'leastSimilar'
+    if(l.data.leastSimilar){
+      //we will see if this link is connected to a node
+      //that has at least a total of 3 dissimilar nodes
+      //otherwise we won't use it in the clustering
+      s.length = 5;
+      s.weight = 3.0; //isStronglyDisimilar(l, 3) ? 3.0 : 0.001;
+    } else if (l.data.mostSimilar) { 
+      s.length = l.data.d*1000; 
+      s.weight = 0.001;
+    } else { 
+      s.length = l.data.d*50;   s.weight = 0.001;
+    }
   }
 }
 
