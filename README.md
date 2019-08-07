@@ -5,7 +5,7 @@ Hopefully this makes the submissions of these aspiring writers fun to explore, a
 
 In a time where it feels like differences between nations and their people are amplified, I hope this serves as reminder that so many of us are connected through the way we experience our planet and each other.
 
-For more background, insights, and technical details; check out this [Blog Post](https://zouhairm.github.io/writerBlock)
+For more background, insights, and technical details; check out this [Blog Post](https://zouhairm.github.io/nomadStories)
 
 This project is made possible thanks to the following packages and data:
 

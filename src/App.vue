@@ -66,7 +66,7 @@
               <li><a target="_blank" href="https://github.com/anvaka/VivaGraphJS">VivaGraphJS (w/ WebGL renderer)</a><li><a target="_blank" href="https://www.mapbox.com/">Mapbox</a></li>
           </ul>
 
-          For more background, insights, and technical details; check out my <a target="_blank" href="https://zouhairm.github.io/writerBlock">Blog Post</a>
+          For more background, insights, and technical details; check out my <a target="_blank" href="https://zouhairm.github.io/nomadStories">Blog Post</a>
 
         </p>
         </div>
